@@ -206,7 +206,7 @@ defmodule Mix.Tasks.Boilex.New do
     mix dialyzer --halt-exit-status
   fi
 
-  echo "Congratulations! Pre-commit hook finished!"
+  echo "Congratulations! Pre-commit hook checks passed!"
   """
 
   defp todo_instructions do
