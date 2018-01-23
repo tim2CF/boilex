@@ -195,7 +195,7 @@ defmodule Mix.Tasks.Boilex.New do
   embed_text :env, """
   ERLANG_HOST=
   ERLANG_APPLICATION=
-  ERLANG_COOKIE =
+  ERLANG_COOKIE=
   """
 
   embed_text :pre_commit, """
@@ -223,7 +223,7 @@ defmodule Mix.Tasks.Boilex.New do
   #!/bin/sh
 
   set -e
-  export $(cat .env.dev | xargs)
+  export $(cat .env | xargs)
 
   iex \
     --remsh "$ERLANG_APPLICATION@$ERLANG_HOST" \
@@ -238,7 +238,7 @@ defmodule Mix.Tasks.Boilex.New do
   #!/bin/sh
 
   set -e
-  export $(cat .env.dev | xargs)
+  export $(cat .env | xargs)
 
   iex \
     --name "$USER-local-$(date +%s)@$ERLANG_HOST" \
