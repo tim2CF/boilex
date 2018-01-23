@@ -4,10 +4,10 @@ Boilex is tool to generate Elixir project configuration boilerplate.
 
 ## Installation
 
+Add the following parameters to `deps` function in `mix.exs` file
+
 ```
-git clone https://github.com/tim2CF/boilex.git
-cd ./boilex
-mix compile && mix archive.build && mix archive.install
+{:boilex, github: "tim2CF/boilex", only: [:dev, :test], runtime: false},
 ```
 
 ## Usage
