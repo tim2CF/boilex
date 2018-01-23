@@ -1,21 +1,18 @@
 # Boilex
 
-**TODO: Add description**
+Boilex is tool to generate Elixir project configuration boilerplate.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `boilex` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:boilex, "~> 0.1.0"}
-  ]
-end
+```
+git clone https://github.com/tim2CF/boilex.git
+cd ./boilex
+mix compile && mix archive.build && mix archive.install
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/boilex](https://hexdocs.pm/boilex).
+## Usage
 
+```
+cd ./myproject
+mix boilex.new
+```
