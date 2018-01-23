@@ -20,8 +20,10 @@ defmodule Mix.Tasks.Boilex.New do
     create_file       "coveralls.json", coveralls_simple_text()
     create_file       ".credo.exs", credo_text()
     create_file       ".dialyzer_ignore", dialyzer_ignore_text()
-    create_file       "scripts/pre-commit.sh", pre_commit_text()
-    :ok = File.chmod  "scripts/pre-commit.sh", 0o755
+    create_file       "scripts/.env", env_text()
+    create_script     "scripts/pre-commit.sh", pre_commit_text()
+    create_script     "scripts/remote-iex.sh", remote_iex_text()
+    create_script     "scripts/cluster-iex.sh", cluster_iex_text()
     :ok = todo_instructions() |> Mix.shell.info
   end
 
@@ -190,6 +192,12 @@ defmodule Mix.Tasks.Boilex.New do
   Use this file just in case of bad 3rd party auto-generated code.
   """
 
+  embed_text :env, """
+  ERLANG_HOST=
+  ERLANG_APPLICATION=
+  ERLANG_COOKIE =
+  """
+
   embed_text :pre_commit, """
   #!/bin/sh
 
@@ -209,6 +217,43 @@ defmodule Mix.Tasks.Boilex.New do
   fi
 
   echo "Congratulations! Pre-commit hook checks passed!"
+  """
+
+  embed_text :remote_iex, """
+  #!/bin/sh
+
+  set -e
+  export $(cat .env.dev | xargs)
+
+  iex \
+    --remsh "$ERLANG_APPLICATION@$ERLANG_HOST" \
+    --name "$USER-remote-$(date +%s)@$ERLANG_HOST" \
+    --cookie "$ERLANG_COOKIE" \
+    --erl "+K true +A 32" \
+    --erl "-kernel inet_dist_listen_min 9100" \
+    --erl "-kernel inet_dist_listen_max 9199"
+  """
+
+  embed_text :cluster_iex, """
+  #!/bin/sh
+
+  set -e
+  export $(cat .env.dev | xargs)
+
+  iex \
+    --name "$USER-local-$(date +%s)@$ERLANG_HOST" \
+    --cookie "$ERLANG_COOKIE" \
+    --erl "+K true +A 32" \
+    --erl "-kernel inet_dist_listen_min 9100" \
+    --erl "-kernel inet_dist_listen_max 9199" \
+    -pa "_build/dev/consolidated/" \
+    -e ":timer.sleep(5000); Node.connect(:\"$ERLANG_APPLICATION@$ERLANG_HOST\")" \
+    -S mix
+
+  # To push local App.Module module bytecode to remote erlang node run
+  #
+  # nl(App.Module)
+  #
   """
 
   defp todo_instructions do
@@ -248,10 +293,17 @@ defmodule Mix.Tasks.Boilex.New do
       {:credo, "~> 0.8",                  only: [:dev, :test], runtime: false},
       {:boilex, github: "tim2CF/boilex",  only: [:dev, :test], runtime: false},
 
+    Please configure `scripts/.env` file if you want to use distributed erlang features in development process.
+
     *****************
     !!! IMPORTANT !!!
     *****************
     """
+  end
+
+  defp create_script(name, value) do
+    create_file       name, value
+    :ok = File.chmod  name, 0o755
   end
 
 end
