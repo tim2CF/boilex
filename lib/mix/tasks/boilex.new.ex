@@ -24,6 +24,7 @@ defmodule Mix.Tasks.Boilex.New do
     create_script     "scripts/pre-commit.sh", pre_commit_text()
     create_script     "scripts/remote-iex.sh", remote_iex_text()
     create_script     "scripts/cluster-iex.sh", cluster_iex_text()
+    create_script     "scripts/check-vars.sh", check_vars_text()
     :ok = todo_instructions() |> Mix.shell.info
   end
 
@@ -196,6 +197,7 @@ defmodule Mix.Tasks.Boilex.New do
   ERLANG_HOST=
   ERLANG_APPLICATION=
   ERLANG_COOKIE=
+  ENABLE_DIALYZER=0
   """
 
   embed_text :pre_commit, """
@@ -223,14 +225,17 @@ defmodule Mix.Tasks.Boilex.New do
   #!/bin/sh
 
   set -e
-  export $(cat .env | xargs)
 
-  iex \
-    --remsh "$ERLANG_APPLICATION@$ERLANG_HOST" \
-    --name "$USER-remote-$(date +%s)@$ERLANG_HOST" \
-    --cookie "$ERLANG_COOKIE" \
-    --erl "+K true +A 32" \
-    --erl "-kernel inet_dist_listen_min 9100" \
+  scripts_dir="$(dirname -- "$0")"
+  export $(cat "$scripts_dir/.env" | xargs)
+  "$scripts_dir/check-vars.sh" "ERLANG_HOST" "ERLANG_APPLICATION" "ERLANG_COOKIE"
+
+  iex \\
+    --remsh "$ERLANG_APPLICATION@$ERLANG_HOST" \\
+    --name "$USER-remote-$(date +%s)@$ERLANG_HOST" \\
+    --cookie "$ERLANG_COOKIE" \\
+    --erl "+K true +A 32" \\
+    --erl "-kernel inet_dist_listen_min 9100" \\
     --erl "-kernel inet_dist_listen_max 9199"
   """
 
@@ -238,22 +243,40 @@ defmodule Mix.Tasks.Boilex.New do
   #!/bin/sh
 
   set -e
-  export $(cat .env | xargs)
 
-  iex \
-    --name "$USER-local-$(date +%s)@$ERLANG_HOST" \
-    --cookie "$ERLANG_COOKIE" \
-    --erl "+K true +A 32" \
-    --erl "-kernel inet_dist_listen_min 9100" \
-    --erl "-kernel inet_dist_listen_max 9199" \
-    -pa "_build/dev/consolidated/" \
-    -e ":timer.sleep(5000); Node.connect(:\"$ERLANG_APPLICATION@$ERLANG_HOST\")" \
+  scripts_dir="$(dirname -- "$0")"
+  export $(cat "$scripts_dir/.env" | xargs)
+  "$scripts_dir/check-vars.sh" "ERLANG_HOST" "ERLANG_APPLICATION" "ERLANG_COOKIE"
+
+  iex \\
+    --name "$USER-local-$(date +%s)@$ERLANG_HOST" \\
+    --cookie "$ERLANG_COOKIE" \\
+    --erl "+K true +A 32" \\
+    --erl "-kernel inet_dist_listen_min 9100" \\
+    --erl "-kernel inet_dist_listen_max 9199" \\
+    -pa "_build/dev/consolidated/" \\
+    -e ":timer.sleep(5000); Node.connect(:\\"$ERLANG_APPLICATION@$ERLANG_HOST\\")" \\
     -S mix
 
   # To push local App.Module module bytecode to remote erlang node run
   #
   # nl(App.Module)
   #
+  """
+
+  embed_text :check_vars, """
+  #!/bin/sh
+
+  set -e
+
+  variables=( "$@" )
+  for varname in "${variables[@]}"
+  do
+    if [[ -z "${!varname}" ]]; then
+        echo "\nplease set variable $varname in scripts/.env file\n"
+        exit 1
+    fi
+  done
   """
 
   defp todo_instructions do
