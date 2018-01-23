@@ -273,7 +273,7 @@ defmodule Mix.Tasks.Boilex.New do
   for varname in "${variables[@]}"
   do
     if [[ -z "${!varname}" ]]; then
-        echo "\nplease set variable $varname in scripts/.env file\n"
+        echo "\\nplease set variable $varname in scripts/.env file\\n"
         exit 1
     fi
   done
