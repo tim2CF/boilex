@@ -15,11 +15,13 @@ defmodule Mix.Tasks.Boilex.New do
 
   @spec run(OptionParser.argv) :: :ok
   def run(_) do
-    create_file "coveralls.json", coveralls_simple_text()
-    create_file ".credo.exs", credo_text()
-    create_file ".dialyzer_ignore", dialyzer_ignore_text()
-    create_file "pre-commit", pre_commit_text()
-    :ok = File.chmod("pre-commit", 0o755)
+    create_directory  "priv"
+    create_directory  "scripts"
+    create_file       "coveralls.json", coveralls_simple_text()
+    create_file       ".credo.exs", credo_text()
+    create_file       ".dialyzer_ignore", dialyzer_ignore_text()
+    create_file       "scripts/pre-commit.sh", pre_commit_text()
+    :ok = File.chmod  "scripts/pre-commit.sh", 0o755
     :ok = todo_instructions() |> Mix.shell.info
   end
 

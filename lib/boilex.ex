@@ -18,7 +18,7 @@ defmodule Boilex do
       {_, 0} = System.cmd("git", ["submodule", "update", "--init", "--recursive"], [cd: project_top_path])
       pre_commit_hook_path = Path.join(git_hooks_path, "pre-commit")
       project_top_path
-      |> Path.join("pre-commit")
+      |> Path.join("scripts/pre-commit.sh")
       |> File.ln_s(pre_commit_hook_path)
       |> case do
         :ok ->
