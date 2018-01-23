@@ -20,6 +20,7 @@ defmodule Mix.Tasks.Boilex.New do
     create_file ".dialyzer_ignore", dialyzer_ignore_text()
     create_file "pre-commit", pre_commit_text()
     :ok = File.chmod("pre-commit", 0o755)
+    :ok = todo_instructions() |> Mix.shell.info
   end
 
   embed_text :coveralls_simple, """
@@ -207,5 +208,48 @@ defmodule Mix.Tasks.Boilex.New do
 
   echo "Congratulations! Pre-commit hook finished!"
   """
+
+  defp todo_instructions do
+    """
+
+    *****************
+    !!! IMPORTANT !!!
+    *****************
+
+    Add the following parameters to `project` function in `mix.exs` file
+
+      # excoveralls
+      test_coverage:      [tool: ExCoveralls],
+      preferred_cli_env:  [
+        "coveralls":            :test,
+        "coveralls.travis":     :test,
+        "coveralls.circle":     :test,
+        "coveralls.semaphore":  :test,
+        "coveralls.post":       :test,
+        "coveralls.detail":     :test,
+        "coveralls.html":       :test,
+      ],
+      # dialyxir
+      dialyzer:     [ignore_warnings: ".dialyzer_ignore"],
+      # ex_doc
+      name:         "ELIXIR_APPLICATION_NAME",
+      source_url:   "GITHUB_URL",
+      homepage_url: "GITHUB_URL",
+      docs:         [main: "ELIXIR_APPLICATION_NAME", extras: ["README.md"]],
+
+    Add the following parameters to `deps` function in `mix.exs` file
+
+      # development tools
+      {:excoveralls, "~> 0.8",            only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 0.5",               only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.18",                only: [:dev, :test], runtime: false},
+      {:credo, "~> 0.8",                  only: [:dev, :test], runtime: false},
+      {:boilex, github: "tim2CF/boilex",  only: [:dev, :test], runtime: false},
+
+    *****************
+    !!! IMPORTANT !!!
+    *****************
+    """
+  end
 
 end
