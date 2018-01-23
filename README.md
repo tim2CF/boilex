@@ -14,7 +14,7 @@ Add the following parameters to `deps` function in `mix.exs` file
 
 ### boilex.new
 
-Command `mix boilex.new` generates development tools configuration files in already existing Elixir project. It can be used with any Elixir / Phoenix application except *umbrella* projects. To generate configuration execute this command and follow instructions.
+Command `mix boilex.new` generates development tools configuration files in already existing Elixir project. It can be used with any **Elixir** or **Phoenix** application except *umbrella* projects. To generate configuration execute this command and follow instructions.
 
 ```
 cd ./myproject
