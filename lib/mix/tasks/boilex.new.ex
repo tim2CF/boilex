@@ -229,7 +229,7 @@ defmodule Mix.Tasks.Boilex.New do
   ERLANG_HOST=
   ERLANG_APPLICATION=
   ERLANG_COOKIE=
-  ENABLE_DIALYZER=0
+  ENABLE_DIALYZER=false
   """
 
   embed_text :pre_commit, """
@@ -238,6 +238,10 @@ defmodule Mix.Tasks.Boilex.New do
   set -e
   export MIX_ENV=test
 
+  scripts_dir="$(dirname -- "$0")"
+  export $(cat "$scripts_dir/.env" | xargs)
+  "$scripts_dir/check-vars.sh" "ENABLE_DIALYZER"
+
   mix deps.get
   mix deps.compile
   mix compile --warnings-as-errors
@@ -245,8 +249,7 @@ defmodule Mix.Tasks.Boilex.New do
   mix coveralls.html
   mix docs
 
-  if [ -v $ENABLE_DIALYZER ]
-  then
+  if [ "$ENABLE_DIALYZER" = true ] ; then
     mix dialyzer --halt-exit-status
   fi
 
