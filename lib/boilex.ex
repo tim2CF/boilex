@@ -19,23 +19,7 @@ defmodule Boilex do
       pre_commit_hook_path = Path.join(git_hooks_path, "pre-commit")
       project_top_path
       |> Path.join("scripts/pre-commit.sh")
-      |> File.ln_s(pre_commit_hook_path)
-      |> case do
-        :ok ->
-          Logger.info("pre-commit hook #{pre_commit_hook_path} created")
-        {:error, :eexist} ->
-          Logger.info("pre-commit hook #{pre_commit_hook_path} already exists, do nothing")
-        error ->
-          """
-
-          ************************************************
-          Can not create symbolic link for pre-commit hook #{pre_commit_hook_path}
-          because of error #{inspect error}
-          ************************************************
-
-          """
-          |> raise
-      end
+      |> Boilex.Utils.create_symlink(pre_commit_hook_path)
     false ->
       """
 

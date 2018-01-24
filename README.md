@@ -1,6 +1,6 @@
 # Boilex
 
-Boilex is tool to generate Elixir project development tools configuration boilerplate.
+Boilex is mix task to generate Elixir project development tools configuration boilerplate.
 
 ## Installation
 
