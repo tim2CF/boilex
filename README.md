@@ -26,6 +26,7 @@ mix boilex.new
 - `Dialyzer` is static analysis tool for BEAM bytecode. Most useful feature of this tool is perfect type inference what will work in your project from-the-box without writing any explicit function specs or any other overhead. Can be configured with `.dialyzer_ignore` file.
 - `ExDoc` is a tool to generate beautiful documentation for your Elixir projects.
 - `Credo` static code analysis tool will make your code pretty and consistent. Can be configured with `.credo.exs` file.
+- `Changex` is changelog generator.
 - `scripts` directory contains auto-generated bash helper scripts.
 
 ### scripts
@@ -33,3 +34,10 @@ mix boilex.new
 - `.env` text file contains variables are required by some scripts.
 - `remote-iex.sh` provides direct access to remote erlang node through `iex`.
 - `cluster-iex.sh` connects current erlang node to remote erlang node. All local debug tools (for example Observer) are available to debug remote node. Hot code reloading is also available.
+
+## TODO
+
+- `Dockerfile` template
+- `docker-compose.yml` template
+- `.circleci` yaml configs template
+- `scripts/release.sh` script bumps version, creates new release, changelog and pushes to github.

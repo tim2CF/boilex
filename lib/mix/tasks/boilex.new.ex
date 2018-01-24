@@ -20,6 +20,7 @@ defmodule Mix.Tasks.Boilex.New do
     create_file       "coveralls.json", coveralls_simple_text()
     create_file       ".credo.exs", credo_text()
     create_file       ".dialyzer_ignore", dialyzer_ignore_text()
+    create_file       ".editorconfig", editorconfig_text()
     create_file       "scripts/.env", env_text()
     create_script     "scripts/pre-commit.sh", pre_commit_text()
     create_script     "scripts/remote-iex.sh", remote_iex_text()
@@ -193,6 +194,35 @@ defmodule Mix.Tasks.Boilex.New do
   Use this file just in case of bad 3rd party auto-generated code.
   """
 
+  embed_text :editorconfig, """
+  # Editor configuration file
+  # For Emacs install package `editorconfig`
+  # For Atom install package `editorconfig`
+  # For Sublime Text install package `EditorConfig`
+  root = true
+
+  [*]
+  indent_style = space
+  indent_size = 2
+  end_of_line = lf
+  charset = utf-8
+  trim_trailing_whitespace = true
+  insert_final_newline = true
+  max_line_length = 100
+
+  [*.md]
+  indent_style = space
+  indent_size = 2
+
+  [*.yml]
+  indent_style = space
+  indent_size = 2
+
+  [*.json]
+  indent_style = space
+  indent_size = 2
+  """
+
   embed_text :env, """
   ERLANG_HOST=
   ERLANG_APPLICATION=
@@ -314,6 +344,7 @@ defmodule Mix.Tasks.Boilex.New do
       {:dialyxir, "~> 0.5",               only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.18",                only: [:dev, :test], runtime: false},
       {:credo, "~> 0.8",                  only: [:dev, :test], runtime: false},
+      {:changex, "~> 0.1.1",              only: [:dev, :test], runtime: false},
       {:boilex, github: "tim2CF/boilex",  only: [:dev, :test], runtime: false},
 
     Please configure `scripts/.env` file if you want to use distributed erlang features in development process.
