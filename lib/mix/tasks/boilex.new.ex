@@ -17,15 +17,17 @@ defmodule Mix.Tasks.Boilex.New do
   def run(_) do
     create_directory  "priv"
     create_directory  "scripts"
-    create_file       "coveralls.json", coveralls_simple_text()
-    create_file       ".credo.exs", credo_text()
-    create_file       ".dialyzer_ignore", dialyzer_ignore_text()
-    create_file       ".editorconfig", editorconfig_text()
-    create_file       "scripts/.env", env_text()
-    create_script     "scripts/pre-commit.sh", pre_commit_text()
-    create_script     "scripts/remote-iex.sh", remote_iex_text()
+    create_file       "coveralls.json",         coveralls_simple_text()
+    create_file       ".credo.exs",             credo_text()
+    create_file       ".dialyzer_ignore",       dialyzer_ignore_text()
+    create_file       ".editorconfig",          editorconfig_text()
+    create_file       "scripts/.env",           env_text()
+    create_script     "scripts/pre-commit.sh",  pre_commit_text()
+    create_script     "scripts/remote-iex.sh",  remote_iex_text()
     create_script     "scripts/cluster-iex.sh", cluster_iex_text()
-    create_script     "scripts/check-vars.sh", check_vars_text()
+    create_script     "scripts/check-vars.sh",  check_vars_text()
+    create_script     "scripts/docs.sh",        docs_text()
+    create_script     "scripts/coverage.sh",    coverage_text()
     :ok = todo_instructions() |> Mix.shell.info
   end
 
@@ -307,6 +309,28 @@ defmodule Mix.Tasks.Boilex.New do
         exit 1
     fi
   done
+  """
+
+  embed_text :docs, """
+  #!/bin/bash
+
+  set -e
+
+  mix compile
+  mix docs
+  echo "Documentation has been generated!"
+  open ./doc/index.html
+  """
+
+  embed_text :coverage, """
+  #!/bin/sh
+
+  set -e
+
+  mix compile
+  mix coveralls.html
+  echo "Coverage report has been generated!"
+  open ./cover/excoveralls.html
   """
 
   defp todo_instructions do

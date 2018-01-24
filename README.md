@@ -34,6 +34,8 @@ mix boilex.new
 - `.env` text file contains variables are required by some scripts.
 - `remote-iex.sh` provides direct access to remote erlang node through `iex`.
 - `cluster-iex.sh` connects current erlang node to remote erlang node. All local debug tools (for example Observer) are available to debug remote node. Hot code reloading is also available.
+- `docs.sh` creates and opens project documentation.
+- `coverage.sh` creates and opens project test coverage report.
 
 ## TODO
 
