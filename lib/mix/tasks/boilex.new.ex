@@ -246,7 +246,7 @@ defmodule Mix.Tasks.Boilex.New do
 
   scripts_dir="$(dirname -- "$script_file")"
   export $(cat "$scripts_dir/.env" | xargs)
-  "$scripts_dir/check-vars.sh" "ENABLE_DIALYZER"
+  "$scripts_dir/check-vars.sh" "in scripts/.env file" "ENABLE_DIALYZER"
 
   mix deps.get
   mix deps.compile
@@ -270,7 +270,7 @@ defmodule Mix.Tasks.Boilex.New do
   script_file="$0"
   scripts_dir="$(dirname -- "$script_file")"
   export $(cat "$scripts_dir/.env" | xargs)
-  "$scripts_dir/check-vars.sh" "ERLANG_HOST" "ERLANG_APPLICATION" "ERLANG_COOKIE"
+  "$scripts_dir/check-vars.sh" "in scripts/.env file" "ERLANG_HOST" "ERLANG_APPLICATION" "ERLANG_COOKIE"
 
   iex \\
     --remsh "$ERLANG_APPLICATION@$ERLANG_HOST" \\
@@ -289,7 +289,7 @@ defmodule Mix.Tasks.Boilex.New do
   script_file="$0"
   scripts_dir="$(dirname -- "$script_file")"
   export $(cat "$scripts_dir/.env" | xargs)
-  "$scripts_dir/check-vars.sh" "ERLANG_HOST" "ERLANG_APPLICATION" "ERLANG_COOKIE"
+  "$scripts_dir/check-vars.sh" "in scripts/.env file" "ERLANG_HOST" "ERLANG_APPLICATION" "ERLANG_COOKIE"
 
   iex \\
     --name "$USER-local-$(date +%s)@$ERLANG_HOST" \\
@@ -312,11 +312,14 @@ defmodule Mix.Tasks.Boilex.New do
 
   set -e
 
-  variables=( "$@" )
+  arguments=( "$@" )
+  variables=( "${arguments[@]:1}" )
+  message="${arguments[0]}"
+
   for varname in "${variables[@]}"
   do
     if [[ -z "${!varname}" ]]; then
-        echo "\\nplease set variable $varname in scripts/.env file\\n"
+        echo "\\nplease set variable $varname $message\\n"
         exit 1
     fi
   done
