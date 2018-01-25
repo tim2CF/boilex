@@ -238,7 +238,13 @@ defmodule Mix.Tasks.Boilex.New do
   set -e
   export MIX_ENV=test
 
-  scripts_dir="$(dirname -- "$0")"
+  if [[ -L "$0" ]] && [[ -e "$0" ]] ; then
+    script_file="$(readlink "$0")"
+  else
+    script_file="$0"
+  fi
+
+  scripts_dir="$(dirname -- "$script_file")"
   export $(cat "$scripts_dir/.env" | xargs)
   "$scripts_dir/check-vars.sh" "ENABLE_DIALYZER"
 
@@ -261,7 +267,8 @@ defmodule Mix.Tasks.Boilex.New do
 
   set -e
 
-  scripts_dir="$(dirname -- "$0")"
+  script_file="$0"
+  scripts_dir="$(dirname -- "$script_file")"
   export $(cat "$scripts_dir/.env" | xargs)
   "$scripts_dir/check-vars.sh" "ERLANG_HOST" "ERLANG_APPLICATION" "ERLANG_COOKIE"
 
@@ -279,7 +286,8 @@ defmodule Mix.Tasks.Boilex.New do
 
   set -e
 
-  scripts_dir="$(dirname -- "$0")"
+  script_file="$0"
+  scripts_dir="$(dirname -- "$script_file")"
   export $(cat "$scripts_dir/.env" | xargs)
   "$scripts_dir/check-vars.sh" "ERLANG_HOST" "ERLANG_APPLICATION" "ERLANG_COOKIE"
 
