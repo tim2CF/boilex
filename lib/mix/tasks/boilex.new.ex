@@ -22,6 +22,8 @@ defmodule Mix.Tasks.Boilex.New do
     create_file       ".dialyzer_ignore",       dialyzer_ignore_text()
     create_file       ".editorconfig",          editorconfig_text()
     create_file       "scripts/.env",           env_text()
+    create_file       "Dockerfile",             dockerfile_text()
+    create_file       "docker-compose.yml",     docker_compose_text()
     create_script     "scripts/pre-commit.sh",  pre_commit_text()
     create_script     "scripts/remote-iex.sh",  remote_iex_text()
     create_script     "scripts/cluster-iex.sh", cluster_iex_text()
@@ -232,8 +234,68 @@ defmodule Mix.Tasks.Boilex.New do
   ENABLE_DIALYZER=false
   """
 
+  embed_text :dockerfile, """
+  FROM elixir:1.6
+  MAINTAINER DEFINE_ME
+
+  RUN apt-get update && \\
+      # inotify-tools is dep for hot code-reloading, useful for development
+      apt-get install -y libssl1.0.0 inotify-tools
+
+  WORKDIR /app
+
+  COPY . .
+
+  RUN mix do local.hex --force, local.rebar --force && \\
+      MIX_ENV=staging mix compile.protocols && \\
+      MIX_ENV=prod  mix compile.protocols
+
+  CMD echo "Checking system variables..." && \\
+      scripts/check-vars.sh "in system" "MIX_ENV" "ERLANG_APPLICATION" "ERLANG_HOST" "ERLANG_MIN_PORT" "ERLANG_MAX_PORT" "ERLANG_MAX_PROCESSES" "ERLANG_COOKIE" && \\
+      echo "Running app..." && \\
+      elixir \\
+        --name "$ERLANG_APPLICATION@$ERLANG_HOST" \\
+        --cookie $ERLANG_COOKIE \\
+        --erl "+K true +A 32 +P $ERLANG_MAX_PROCESSES" \\
+        --erl "-kernel inet_dist_listen_min $ERLANG_MIN_PORT" \\
+        --erl "-kernel inet_dist_listen_max $ERLANG_MAX_PORT" \\
+        -pa "_build/$MIX_ENV/consolidated/" \\
+        -S mix run \\
+        --no-halt
+  """
+
+  embed_text :docker_compose, """
+  version: "3"
+
+  services:
+    main:
+      image: "DEFINE_ME:latest"
+      ports:
+        - "6666:4369"
+        - "9100-9105:9100-9105"
+      environment:
+        MIX_ENV: staging
+        ERLANG_APPLICATION: DEFINE_ME
+        ERLANG_HOST: ${DOCKER_HOST}
+        ERLANG_MIN_PORT: 9100
+        ERLANG_MAX_PORT: 9105
+        ERLANG_MAX_PROCESSES: 1000000
+        ERLANG_COOKIE: DEFINE_ME
+      networks:
+        - default
+      deploy:
+        resources:
+          limits:
+            memory: 4096M
+          reservations:
+            memory: 2048M
+        restart_policy:
+          condition: on-failure
+          delay: 5s
+  """
+
   embed_text :pre_commit, """
-  #!/bin/sh
+  #!/bin/bash
 
   set -e
   export MIX_ENV=test
@@ -263,7 +325,7 @@ defmodule Mix.Tasks.Boilex.New do
   """
 
   embed_text :remote_iex, """
-  #!/bin/sh
+  #!/bin/bash
 
   set -e
 
@@ -282,7 +344,7 @@ defmodule Mix.Tasks.Boilex.New do
   """
 
   embed_text :cluster_iex, """
-  #!/bin/sh
+  #!/bin/bash
 
   set -e
 
@@ -308,7 +370,7 @@ defmodule Mix.Tasks.Boilex.New do
   """
 
   embed_text :check_vars, """
-  #!/bin/sh
+  #!/bin/bash
 
   set -e
 
@@ -337,7 +399,7 @@ defmodule Mix.Tasks.Boilex.New do
   """
 
   embed_text :coverage, """
-  #!/bin/sh
+  #!/bin/bash
 
   set -e
 
