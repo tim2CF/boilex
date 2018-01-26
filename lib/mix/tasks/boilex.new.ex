@@ -15,15 +15,22 @@ defmodule Mix.Tasks.Boilex.New do
 
   @spec run(OptionParser.argv) :: :ok
   def run(_) do
+
+    otp_application = fetch_otp_application_name()
+    erlang_cookie   = :crypto.strong_rand_bytes(32) |> Base.encode64
+    assigns         = [otp_application: otp_application, erlang_cookie: erlang_cookie]
+
     create_directory  "priv"
     create_directory  "scripts"
     create_file       "coveralls.json",         coveralls_simple_text()
     create_file       ".credo.exs",             credo_text()
     create_file       ".dialyzer_ignore",       dialyzer_ignore_text()
     create_file       ".editorconfig",          editorconfig_text()
-    create_file       "scripts/.env",           env_text()
-    create_file       "Dockerfile",             dockerfile_text()
-    create_file       "docker-compose.yml",     docker_compose_text()
+    if Mix.shell.yes?("Generate docker files templates?") do
+      create_file     "Dockerfile",             dockerfile_text()
+      create_file     "docker-compose.yml",     docker_compose_template(assigns)
+    end
+    create_file       "scripts/.env",           env_template(assigns)
     create_script     "scripts/pre-commit.sh",  pre_commit_text()
     create_script     "scripts/remote-iex.sh",  remote_iex_text()
     create_script     "scripts/cluster-iex.sh", cluster_iex_text()
@@ -31,6 +38,25 @@ defmodule Mix.Tasks.Boilex.New do
     create_script     "scripts/docs.sh",        docs_text()
     create_script     "scripts/coverage.sh",    coverage_text()
     :ok = todo_instructions() |> Mix.shell.info
+  end
+
+  defp fetch_otp_application_name do
+    Mix.shell.prompt("Please type OTP application name")
+    |> String.trim
+    |> Macro.underscore
+    |> String.downcase
+    |> case do
+      "" ->
+        Mix.shell.error("Empty OTP application name")
+        fetch_otp_application_name()
+      name ->
+        case Regex.match?(~r/^[a-z][0-9a-z_]+[a-z]$/, name)  do
+          true -> name
+          false ->
+            Mix.shell.error("Invalid OTP application name")
+            fetch_otp_application_name()
+        end
+    end
   end
 
   embed_text :coveralls_simple, """
@@ -227,10 +253,10 @@ defmodule Mix.Tasks.Boilex.New do
   indent_size = 2
   """
 
-  embed_text :env, """
+  embed_template :env, """
   ERLANG_HOST=
-  ERLANG_APPLICATION=
-  ERLANG_COOKIE=
+  ERLANG_OTP_APPLICATION=<%= @otp_application %>
+  ERLANG_COOKIE=<%= @erlang_cookie %>
   ENABLE_DIALYZER=false
   """
 
@@ -251,10 +277,10 @@ defmodule Mix.Tasks.Boilex.New do
       MIX_ENV=prod  mix compile.protocols
 
   CMD echo "Checking system variables..." && \\
-      scripts/check-vars.sh "in system" "MIX_ENV" "ERLANG_APPLICATION" "ERLANG_HOST" "ERLANG_MIN_PORT" "ERLANG_MAX_PORT" "ERLANG_MAX_PROCESSES" "ERLANG_COOKIE" && \\
+      scripts/check-vars.sh "in system" "MIX_ENV" "ERLANG_OTP_APPLICATION" "ERLANG_HOST" "ERLANG_MIN_PORT" "ERLANG_MAX_PORT" "ERLANG_MAX_PROCESSES" "ERLANG_COOKIE" && \\
       echo "Running app..." && \\
       elixir \\
-        --name "$ERLANG_APPLICATION@$ERLANG_HOST" \\
+        --name "$ERLANG_OTP_APPLICATION@$ERLANG_HOST" \\
         --cookie $ERLANG_COOKIE \\
         --erl "+K true +A 32 +P $ERLANG_MAX_PROCESSES" \\
         --erl "-kernel inet_dist_listen_min $ERLANG_MIN_PORT" \\
@@ -264,23 +290,23 @@ defmodule Mix.Tasks.Boilex.New do
         --no-halt
   """
 
-  embed_text :docker_compose, """
+  embed_template :docker_compose, """
   version: "3"
 
   services:
     main:
-      image: "DEFINE_ME:latest"
+      image: "<%= @otp_application %>:latest"
       ports:
         - "6666:4369"
         - "9100-9105:9100-9105"
       environment:
         MIX_ENV: staging
-        ERLANG_APPLICATION: DEFINE_ME
+        ERLANG_OTP_APPLICATION: <%= @otp_application %>
         ERLANG_HOST: ${DOCKER_HOST}
         ERLANG_MIN_PORT: 9100
         ERLANG_MAX_PORT: 9105
         ERLANG_MAX_PROCESSES: 1000000
-        ERLANG_COOKIE: DEFINE_ME
+        ERLANG_COOKIE: "<%= @erlang_cookie %>"
       networks:
         - default
       deploy:
@@ -332,10 +358,10 @@ defmodule Mix.Tasks.Boilex.New do
   script_file="$0"
   scripts_dir="$(dirname -- "$script_file")"
   export $(cat "$scripts_dir/.env" | xargs)
-  "$scripts_dir/check-vars.sh" "in scripts/.env file" "ERLANG_HOST" "ERLANG_APPLICATION" "ERLANG_COOKIE"
+  "$scripts_dir/check-vars.sh" "in scripts/.env file" "ERLANG_HOST" "ERLANG_OTP_APPLICATION" "ERLANG_COOKIE"
 
   iex \\
-    --remsh "$ERLANG_APPLICATION@$ERLANG_HOST" \\
+    --remsh "$ERLANG_OTP_APPLICATION@$ERLANG_HOST" \\
     --name "$USER-remote-$(date +%s)@$ERLANG_HOST" \\
     --cookie "$ERLANG_COOKIE" \\
     --erl "+K true +A 32" \\
@@ -351,7 +377,7 @@ defmodule Mix.Tasks.Boilex.New do
   script_file="$0"
   scripts_dir="$(dirname -- "$script_file")"
   export $(cat "$scripts_dir/.env" | xargs)
-  "$scripts_dir/check-vars.sh" "in scripts/.env file" "ERLANG_HOST" "ERLANG_APPLICATION" "ERLANG_COOKIE"
+  "$scripts_dir/check-vars.sh" "in scripts/.env file" "ERLANG_HOST" "ERLANG_OTP_APPLICATION" "ERLANG_COOKIE"
 
   iex \\
     --name "$USER-local-$(date +%s)@$ERLANG_HOST" \\
@@ -360,7 +386,7 @@ defmodule Mix.Tasks.Boilex.New do
     --erl "-kernel inet_dist_listen_min 9100" \\
     --erl "-kernel inet_dist_listen_max 9199" \\
     -pa "_build/dev/consolidated/" \\
-    -e ":timer.sleep(5000); Node.connect(:\\"$ERLANG_APPLICATION@$ERLANG_HOST\\")" \\
+    -e ":timer.sleep(5000); Node.connect(:\\"$ERLANG_OTP_APPLICATION@$ERLANG_HOST\\")" \\
     -S mix
 
   # To push local App.Module module bytecode to remote erlang node run
