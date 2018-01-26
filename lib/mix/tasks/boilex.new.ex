@@ -255,8 +255,8 @@ defmodule Mix.Tasks.Boilex.New do
 
   embed_template :env, """
   ERLANG_HOST=
-  ERLANG_OTP_APPLICATION=<%= @otp_application %>
-  ERLANG_COOKIE=<%= @erlang_cookie %>
+  ERLANG_OTP_APPLICATION="<%= @otp_application %>"
+  ERLANG_COOKIE="<%= @erlang_cookie %>"
   ENABLE_DIALYZER=false
   """
 
@@ -281,7 +281,7 @@ defmodule Mix.Tasks.Boilex.New do
       echo "Running app..." && \\
       elixir \\
         --name "$ERLANG_OTP_APPLICATION@$ERLANG_HOST" \\
-        --cookie $ERLANG_COOKIE \\
+        --cookie "$ERLANG_COOKIE" \\
         --erl "+K true +A 32 +P $ERLANG_MAX_PROCESSES" \\
         --erl "-kernel inet_dist_listen_min $ERLANG_MIN_PORT" \\
         --erl "-kernel inet_dist_listen_max $ERLANG_MAX_PORT" \\
@@ -301,8 +301,8 @@ defmodule Mix.Tasks.Boilex.New do
         - "9100-9105:9100-9105"
       environment:
         MIX_ENV: staging
-        ERLANG_OTP_APPLICATION: <%= @otp_application %>
-        ERLANG_HOST: ${DOCKER_HOST}
+        ERLANG_OTP_APPLICATION: "<%= @otp_application %>"
+        ERLANG_HOST: "${DOCKER_HOST}"
         ERLANG_MIN_PORT: 9100
         ERLANG_MAX_PORT: 9105
         ERLANG_MAX_PROCESSES: 1000000
