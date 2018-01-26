@@ -37,6 +37,7 @@ defmodule Mix.Tasks.Boilex.New do
     create_script     "scripts/check-vars.sh",  check_vars_text()
     create_script     "scripts/docs.sh",        docs_text()
     create_script     "scripts/coverage.sh",    coverage_text()
+    create_script     "scripts/start.sh",       start_text()
     :ok = todo_instructions() |> Mix.shell.info
   end
 
@@ -433,6 +434,19 @@ defmodule Mix.Tasks.Boilex.New do
   mix coveralls.html
   echo "Coverage report has been generated!"
   open ./cover/excoveralls.html
+  """
+
+  embed_text :start, """
+  #!/bin/bash
+
+  set -e
+
+  iex \\
+    --erl "+K true +A 32" \\
+    --erl "-kernel inet_dist_listen_min 9100" \\
+    --erl "-kernel inet_dist_listen_max 9199" \\
+    --erl "-kernel shell_history enabled" \\
+    -S mix
   """
 
   defp todo_instructions do
