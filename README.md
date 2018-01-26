@@ -12,14 +12,14 @@ Add the following parameters to `deps` function in `mix.exs` file
 
 ## Usage
 
-### boilex.new
+### boilex.init
 
-Command `mix boilex.new` generates development tools configuration files in already existing Elixir project. It can be used with any **Elixir** or **Phoenix** application except *umbrella* projects. To generate configuration execute this command and follow instructions.
+Command `mix boilex.init` generates development tools configuration files in already existing Elixir project. It can be used with any **Elixir** or **Phoenix** application except *umbrella* projects. To generate configuration execute this command and follow instructions.
 
 ```
 cd ./myproject
 mix deps.get && mix compile
-mix boilex.new
+mix boilex.init
 ```
 
 - `Coveralls` tool will help you to check test coverage for each module of new project. Can be configured with `coveralls.json` file. It's recommended to keep minimal test coverage = 100%.

@@ -1,15 +1,16 @@
-defmodule Mix.Tasks.Boilex.New do
+defmodule Mix.Tasks.Boilex.Init do
   use Mix.Task
   import Mix.Generator
 
   @shortdoc "Creates new configuration files for Elixir project dev tools"
 
   @moduledoc """
-  Creates new configuration files for Elixir project dev tools.
-  Usage
+  Creates new (or updates old) configuration files for Elixir dev tools and scripts.
+
+  # Usage
   ```
   cd ./myproject
-  mix boilex.new
+  mix boilex.init
   ```
   """
 
