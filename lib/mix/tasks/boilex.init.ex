@@ -486,6 +486,7 @@ defmodule Mix.Tasks.Boilex.Init do
     -F "file=@$ERLANG_DOC_ARCHIVE" \\
     -F "minorEdit=true" \\
     "https://$CONFLUENCE_SUBDOMAIN.atlassian.net/wiki/rest/api/content/$CONFLUENCE_PAGE_ID/child/attachment"
+  echo "confluence: documentation uploaded!"
   """
 
   defp todo_instructions do
