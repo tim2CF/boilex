@@ -267,6 +267,8 @@ defmodule Mix.Tasks.Boilex.Init do
   ERLANG_OTP_APPLICATION="<%= @otp_application %>"
   ERLANG_COOKIE="<%= @erlang_cookie %>"
   ENABLE_DIALYZER=false
+  CONFLUENCE_SUBDOMAIN=
+  CONFLUENCE_PAGE_ID=
   """
 
   embed_text :dockerfile, """
@@ -464,6 +466,7 @@ defmodule Mix.Tasks.Boilex.Init do
 
   script_file="$0"
   scripts_dir="$(dirname -- "$script_file")"
+  export $(cat "$scripts_dir/../.env" | xargs)
   "$scripts_dir/../check-vars.sh" "in system" "ERLANG_OTP_APPLICATION" "CONFLUENCE_SUBDOMAIN" "CONFLUENCE_PAGE_ID" "CONFLUENCE_SECRET"
 
   ERLANG_OTP_APPLICATION_DASH="${ERLANG_OTP_APPLICATION//_/-}"
