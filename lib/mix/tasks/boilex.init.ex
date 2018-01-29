@@ -23,6 +23,7 @@ defmodule Mix.Tasks.Boilex.Init do
 
     create_directory  "priv"
     create_directory  "scripts"
+    create_directory  "scripts/ci"
     create_file       "VERSION.txt",            version_text()
     create_file       "coveralls.json",         coveralls_simple_text()
     create_file       ".credo.exs",             credo_text()
@@ -39,7 +40,8 @@ defmodule Mix.Tasks.Boilex.Init do
     create_script     "scripts/check-vars.sh",  check_vars_text()
     create_script     "scripts/docs.sh",        docs_text()
     create_script     "scripts/coverage.sh",    coverage_text()
-    create_script     "scripts/start.sh",       start_text()
+    create_script     "scripts/start.sh",         start_text()
+    create_script     "scripts/ci/confluence.sh", confluence_text()
     :ok = todo_instructions() |> Mix.shell.info
   end
 
@@ -455,6 +457,34 @@ defmodule Mix.Tasks.Boilex.Init do
     -S mix
   """
 
+  embed_text :confluence, """
+  #!/bin/bash
+
+  set -e
+
+  script_file="$0"
+  scripts_dir="$(dirname -- "$script_file")"
+  "$scripts_dir/../check-vars.sh" "in system" "ERLANG_OTP_APPLICATION" "CONFLUENCE_SUBDOMAIN" "CONFLUENCE_PAGE_ID" "CONFLUENCE_SECRET"
+
+  ERLANG_OTP_APPLICATION_DASH="${ERLANG_OTP_APPLICATION//_/-}"
+  ERLANG_DOC_DIRNAME="$ERLANG_OTP_APPLICATION_DASH-$(cat VERSION.txt)-doc"
+  ERLANG_DOC_ARCHIVE="$ERLANG_DOC_DIRNAME.zip"
+
+  echo "confluence: cp documentation directory"
+  cp -R doc "$ERLANG_DOC_DIRNAME"
+  echo "confluence: creating documentation .zip archive"
+  zip -r "$ERLANG_DOC_ARCHIVE" "$ERLANG_DOC_DIRNAME"
+  echo "confluence: uploading documentation to page $CONFLUENCE_PAGE_ID"
+  curl -D- \\
+    --fail \\
+    -H "Authorization: Basic $CONFLUENCE_SECRET" \\
+    -X PUT \\
+    -H "X-Atlassian-Token: nocheck" \\
+    -F "file=@$ERLANG_DOC_ARCHIVE" \\
+    -F "minorEdit=true" \\
+    "https://$CONFLUENCE_SUBDOMAIN.atlassian.net/wiki/rest/api/content/$CONFLUENCE_PAGE_ID/child/attachment"
+  """
+
   defp todo_instructions do
     """
     #{IO.ANSI.magenta}
@@ -515,6 +545,7 @@ defmodule Mix.Tasks.Boilex.Init do
     *****************
     !!! IMPORTANT !!!
     *****************
+    #{IO.ANSI.reset}
     """
   end
 
