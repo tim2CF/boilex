@@ -23,6 +23,7 @@ defmodule Mix.Tasks.Boilex.Init do
 
     create_directory  "priv"
     create_directory  "scripts"
+    create_file       "VERSION.txt",            version_text()
     create_file       "coveralls.json",         coveralls_simple_text()
     create_file       ".credo.exs",             credo_text()
     create_file       ".dialyzer_ignore",       dialyzer_ignore_text()
@@ -60,6 +61,10 @@ defmodule Mix.Tasks.Boilex.Init do
         end
     end
   end
+
+  embed_text :version, """
+  0.1.0
+  """
 
   embed_text :coveralls_simple, """
   {
@@ -452,12 +457,23 @@ defmodule Mix.Tasks.Boilex.Init do
 
   defp todo_instructions do
     """
-
+    #{IO.ANSI.magenta}
     *****************
     !!! IMPORTANT !!!
     *****************
 
-    Add the following parameters to `project` function in `mix.exs` file
+    #{IO.ANSI.cyan}
+    REPLACE `version` LINE OF `project` FUNCTION IN `mix.exs` FILE WITH
+    #{IO.ANSI.green}
+
+
+      version: ("VERSION.txt" |> File.read! |> String.trim),
+
+
+    #{IO.ANSI.cyan}
+    ADD THE FOLLOWING PARAMETERS TO `project` FUNCTION IN `mix.exs` FILE
+    #{IO.ANSI.green}
+
 
       # excoveralls
       test_coverage:      [tool: ExCoveralls],
@@ -478,7 +494,10 @@ defmodule Mix.Tasks.Boilex.Init do
       homepage_url: "GITHUB_URL",
       docs:         [main: "ELIXIR_APPLICATION_NAME", extras: ["README.md"]],
 
-    Add the following parameters to `deps` function in `mix.exs` file
+    #{IO.ANSI.cyan}
+    ADD THE FOLLOWING PARAMETERS TO `deps` FUNCTION IN `mix.exs` FILE
+    #{IO.ANSI.green}
+
 
       # development tools
       {:excoveralls, "~> 0.8",            only: [:dev, :test], runtime: false},
@@ -488,8 +507,11 @@ defmodule Mix.Tasks.Boilex.Init do
       {:changex, "~> 0.1.1",              only: [:dev, :test], runtime: false},
       {:boilex, github: "tim2CF/boilex",  only: [:dev, :test], runtime: false},
 
+
+    #{IO.ANSI.reset}
     Please configure `scripts/.env` file if you want to use distributed erlang features in development process.
 
+    #{IO.ANSI.magenta}
     *****************
     !!! IMPORTANT !!!
     *****************
