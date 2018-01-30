@@ -21,18 +21,19 @@ defmodule Mix.Tasks.Boilex.Init do
     erlang_cookie   = :crypto.strong_rand_bytes(32) |> Base.encode64
     assigns         = [otp_application: otp_application, erlang_cookie: erlang_cookie]
 
+    # priv dir for usage in Elixir code
     create_directory  "priv"
-    create_directory  "scripts"
-    create_directory  "scripts/ci"
+    # dev tools configs
     create_file       "VERSION.txt",            version_text()
     create_file       "coveralls.json",         coveralls_simple_text()
     create_file       ".credo.exs",             credo_text()
     create_file       ".dialyzer_ignore",       dialyzer_ignore_text()
     create_file       ".editorconfig",          editorconfig_text()
-    if Mix.shell.yes?("Generate docker files templates?") do
-      create_file     "Dockerfile",             dockerfile_text()
-      create_file     "docker-compose.yml",     docker_compose_template(assigns)
-    end
+    # docker stuff
+    create_file       "Dockerfile",             dockerfile_text()
+    create_file       "docker-compose.yml",     docker_compose_template(assigns)
+    # local dev scripts
+    create_directory  "scripts"
     create_file       "scripts/.env",           env_template(assigns)
     create_script     "scripts/pre-commit.sh",  pre_commit_text()
     create_script     "scripts/remote-iex.sh",  remote_iex_text()
@@ -41,28 +42,18 @@ defmodule Mix.Tasks.Boilex.Init do
     create_script     "scripts/docs.sh",        docs_text()
     create_script     "scripts/coverage.sh",    coverage_text()
     create_script     "scripts/start.sh",         start_text()
-    create_script     "scripts/ci/confluence.sh", confluence_text()
+    # circleci
+    create_directory  ".circleci"
+    create_directory  "scripts/ci"
+    create_file       ".circleci/config.yml",           circleci_config_text()
+    create_script     "scripts/ci/confluence-push.sh",  confluence_push_text()
+    # instructions
     :ok = todo_instructions() |> Mix.shell.info
   end
 
-  defp fetch_otp_application_name do
-    Mix.shell.prompt("Please type OTP application name>")
-    |> String.trim
-    |> Macro.underscore
-    |> String.downcase
-    |> case do
-      "" ->
-        Mix.shell.error("Empty OTP application name!")
-        fetch_otp_application_name()
-      name ->
-        case Regex.match?(~r/^[a-z][0-9a-z_]+[a-z]$/, name)  do
-          true -> name
-          false ->
-            Mix.shell.error("Invalid OTP application name!")
-            fetch_otp_application_name()
-        end
-    end
-  end
+  #
+  # dev tools configs
+  #
 
   embed_text :version, """
   0.1.0
@@ -262,22 +253,16 @@ defmodule Mix.Tasks.Boilex.Init do
   indent_size = 2
   """
 
-  embed_template :env, """
-  ERLANG_HOST=
-  ERLANG_OTP_APPLICATION="<%= @otp_application %>"
-  ERLANG_COOKIE="<%= @erlang_cookie %>"
-  ENABLE_DIALYZER=false
-  CONFLUENCE_SUBDOMAIN=
-  CONFLUENCE_PAGE_ID=
-  """
+  #
+  # docker stuff
+  #
 
   embed_text :dockerfile, """
   FROM elixir:1.6
   MAINTAINER DEFINE_ME
 
-  RUN apt-get update && \\
-      # inotify-tools is dep for hot code-reloading, useful for development
-      apt-get install -y libssl1.0.0 inotify-tools
+  # inotify-tools is dep for hot code-reloading, useful for development
+  RUN apt-get update && apt-get install -y libssl1.0.0 inotify-tools
 
   WORKDIR /app
 
@@ -329,6 +314,19 @@ defmodule Mix.Tasks.Boilex.Init do
         restart_policy:
           condition: on-failure
           delay: 5s
+  """
+
+  #
+  # local dev scripts
+  #
+
+  embed_template :env, """
+  ERLANG_HOST=
+  ERLANG_OTP_APPLICATION="<%= @otp_application %>"
+  ERLANG_COOKIE="<%= @erlang_cookie %>"
+  ENABLE_DIALYZER=false
+  CONFLUENCE_SUBDOMAIN=
+  CONFLUENCE_PAGE_ID=
   """
 
   embed_text :pre_commit, """
@@ -459,7 +457,148 @@ defmodule Mix.Tasks.Boilex.Init do
     -S mix
   """
 
-  embed_text :confluence, """
+  #
+  # circleci
+  #
+
+  embed_text :circleci_config, """
+  defaults: &defaults
+    working_directory: ~/platform88-utils-behaviour
+    docker:
+      - image: elixir:1.6
+
+  version: 2
+  jobs:
+    test:
+      <<: *defaults
+      steps:
+        - checkout
+        - run:
+            name:       Check variables
+            command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" "COVERALLS_REPO_TOKEN"
+        - run:
+            name:       Install env stuff
+            command:    echo 'export TAR_OPTIONS="-o"' >> ~/.bashrc && mix local.hex --force && mix local.rebar --force
+        - run:
+            name:       Setup robot SSH key
+            command:    echo "$ROBOT_SSH_KEY" | base64 --decode > $HOME/.ssh/id_rsa.robot && chmod 600 $HOME/.ssh/id_rsa.robot && ssh-add $HOME/.ssh/id_rsa.robot
+        - run:
+           name:        Setup SSH config
+           command:     echo -e "Host *\\n IdentityFile $HOME/.ssh/id_rsa.robot\\n IdentitiesOnly yes" > $HOME/.ssh/config
+        - run:
+            name:       Fetch submodules
+            command:    git submodule update --init --recursive
+        - restore_cache:
+            keys:
+              - v1-deps-cache-{{ checksum "mix.lock" }}
+              - v1-deps-cache
+        - run:
+            name:       Fetch dependencies
+            command:    mix deps.get
+        - run:
+            name:       Compile dependencies
+            command:    mix deps.compile
+        - run:
+            name:       Compile protocols
+            command:    mix compile.protocols --warnings-as-errors
+        - save_cache:
+            key: v1-deps-cache-{{ checksum "mix.lock" }}
+            paths:
+              - _build
+              - deps
+              - ~/.mix
+        - run:
+            name:       Run tests
+            command:    mix coveralls.circle
+        - run:
+            name:       Run style checks
+            command:    mix credo --strict
+        - restore_cache:
+            keys:
+              - v1-dialyzer-plt-cache-{{ checksum "mix.lock" }}
+              - v1-plt-cache
+        - run:
+            name:       Run Dialyzer type checks
+            command:    mix dialyzer --halt-exit-status
+            no_output_timeout: 15m
+        - save_cache:
+            key: v1-dialyzer-plt-cache-{{ checksum "mix.lock" }}
+            paths:
+              - _build
+              - ~/.mix
+        - persist_to_workspace:
+            root: ./
+            paths:
+              - .
+    build:
+      <<: *defaults
+      steps:
+        - checkout
+        - run:
+            name:       Check variables
+            command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" "COVERALLS_REPO_TOKEN" "DOCKER_EMAIL" "DOCKER_USER" "DOCKER_PASS"
+        - run:
+            name:       Install env stuff
+            command:    echo 'export TAR_OPTIONS="-o"' >> ~/.bashrc && mix local.hex --force && mix local.rebar --force
+        - run:
+            name:       Setup robot SSH key
+            command:    echo "$ROBOT_SSH_KEY" | base64 --decode > $HOME/.ssh/id_rsa.robot && chmod 600 $HOME/.ssh/id_rsa.robot && ssh-add $HOME/.ssh/id_rsa.robot
+        - run:
+           name:        Setup SSH config
+           command:     echo -e "Host *\\n IdentityFile $HOME/.ssh/id_rsa.robot\\n IdentitiesOnly yes" > $HOME/.ssh/config
+        - run:
+            name:       Fetch submodules
+            command:    git submodule update --init --recursive
+        - setup_remote_docker
+        - run:
+            name:       Install Docker client
+            command:    ./scripts/ci/install-docker-client.sh
+        - run:
+            name:       Login to docker
+            command:    docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+        - run:
+            name:       Fetching dependencies
+            command:    mix deps.get && MIX_ENV=staging mix deps.get && MIX_ENV=prod mix deps.get
+        - run:
+            name:       Building docker image
+            command:    ./scripts/ci/docker-build.sh $CIRCLE_TAG
+        - run:
+            name:       Push image to docker hub
+            command:    ./scripts/ci/docker-push.sh $CIRCLE_TAG
+        - run:
+            name:       Compile dependencies
+            command:    mix deps.compile
+        - run:
+            name:       Compile protocols
+            command:    mix compile.protocols --warnings-as-errors
+        - run:
+            name:       Compile documentation
+            command:    mix docs
+        - run:
+            name:       Push documentation to confluence
+            command:    ./scripts/ci/confluence.sh
+
+  workflows:
+    version: 2
+    test:
+      jobs:
+        - test:
+            filters:
+              branches:
+                only: /^([A-Z]{2,}-[0-9]+|hotfix-.+)$/
+    test-n-build:
+      jobs:
+        - test:
+            filters:
+              branches:
+                only: /^(build-*|master)$/
+        - build:
+            filters:
+              branches:
+                only: /^(build-*|master)$/
+  """
+
+  embed_text :confluence_push, """
   #!/bin/bash
 
   set -e
@@ -488,6 +627,29 @@ defmodule Mix.Tasks.Boilex.Init do
     "https://$CONFLUENCE_SUBDOMAIN.atlassian.net/wiki/rest/api/content/$CONFLUENCE_PAGE_ID/child/attachment"
   echo "confluence: documentation uploaded!"
   """
+
+  #
+  # priv
+  #
+
+  defp fetch_otp_application_name do
+    Mix.shell.prompt("Please type OTP application name>")
+    |> String.trim
+    |> Macro.underscore
+    |> String.downcase
+    |> case do
+      "" ->
+        Mix.shell.error("Empty OTP application name!")
+        fetch_otp_application_name()
+      name ->
+        case Regex.match?(~r/^[a-z][0-9a-z_]+[a-z]$/, name)  do
+          true -> name
+          false ->
+            Mix.shell.error("Invalid OTP application name!")
+            fetch_otp_application_name()
+        end
+    end
+  end
 
   defp todo_instructions do
     """
