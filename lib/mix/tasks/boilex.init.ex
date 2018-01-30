@@ -41,12 +41,15 @@ defmodule Mix.Tasks.Boilex.Init do
     create_script     "scripts/check-vars.sh",  check_vars_text()
     create_script     "scripts/docs.sh",        docs_text()
     create_script     "scripts/coverage.sh",    coverage_text()
-    create_script     "scripts/start.sh",         start_text()
+    create_script     "scripts/start.sh",       start_text()
     # circleci
     create_directory  ".circleci"
     create_directory  "scripts/ci"
-    create_file       ".circleci/config.yml",           circleci_config_text()
-    create_script     "scripts/ci/confluence-push.sh",  confluence_push_text()
+    create_file       ".circleci/config.yml",                 circleci_config_text()
+    create_script     "scripts/ci/confluence-push.sh",        confluence_push_text()
+    create_script     "scripts/ci/docker-build.sh",           docker_build_text()
+    create_script     "scripts/ci/docker-push.sh",            docker_push_text()
+    create_script     "scripts/ci/install-docker-client.sh",  install_docker_client_text()
     # instructions
     :ok = todo_instructions() |> Mix.shell.info
   end
@@ -625,6 +628,68 @@ defmodule Mix.Tasks.Boilex.Init do
     -F "minorEdit=true" \\
     "https://$CONFLUENCE_SUBDOMAIN.atlassian.net/wiki/rest/api/content/$CONFLUENCE_PAGE_ID/child/attachment"
   echo "confluence: documentation uploaded!"
+  """
+
+  embed_text :docker_build, """
+  #!/usr/bin/env bash
+
+  set -e
+
+  script_file="$0"
+  scripts_dir="$(dirname -- "$script_file")"
+  export $(cat "$scripts_dir/../.env" | xargs)
+  "$scripts_dir/../check-vars.sh" "in scripts/.env file" "ERLANG_OTP_APPLICATION" "DOCKER_ORG"
+
+  app="$DOCKER_ORG/${ERLANG_OTP_APPLICATION//_/-}"
+  tag="$1"
+
+  if [ "$tag" != "" ]; then
+    echo "docker build --rm=false -t \\"$app\\" ."
+    docker build --rm=false -t "$app" .
+    echo "docker tag $app \\"$app:$tag\\""
+    docker tag $app "$app:$tag"
+  else
+    branch=$(git rev-parse --abbrev-ref HEAD | cut -f2 -d"/")
+    branch=${branch:-master}
+    echo "docker build --rm=false -t \\"$app:$branch\\" ."
+    docker build --rm=false -t "$app:$branch" .
+  fi
+  """
+
+  embed_text :docker_push, """
+  #!/usr/bin/env bash
+
+  set -e
+
+  script_file="$0"
+  scripts_dir="$(dirname -- "$script_file")"
+  export $(cat "$scripts_dir/../.env" | xargs)
+  "$scripts_dir/../check-vars.sh" "in scripts/.env file" "ERLANG_OTP_APPLICATION" "DOCKER_ORG"
+
+  app="$DOCKER_ORG/${ERLANG_OTP_APPLICATION//_/-}"
+  tag="$1"
+
+  if [ "$tag" != "" ]; then
+    echo "docker push \\"$app:latest\\""
+    docker push "$app:latest"
+    echo "docker push \\"$app:$tag\\""
+    docker push "$app:$tag"
+  else
+    branch=$(git rev-parse --abbrev-ref HEAD | cut -f2 -d"/")
+    branch=${branch:-master}
+    echo "docker push \\"$app:$branch\\""
+    docker push "$app:$branch"
+  fi
+  """
+
+  embed_text :install_docker_client, """
+  #!/usr/bin/env bash
+
+  set -x
+  VER="17.03.0-ce"
+  curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
+  tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+  mv /tmp/docker/* /usr/bin
   """
 
   #
