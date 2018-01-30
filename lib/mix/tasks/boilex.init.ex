@@ -538,7 +538,7 @@ defmodule Mix.Tasks.Boilex.Init do
         - checkout
         - run:
             name:       Check variables
-            command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" "COVERALLS_REPO_TOKEN" "DOCKER_EMAIL" "DOCKER_USER" "DOCKER_PASS"
+            command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" "DOCKER_EMAIL" "DOCKER_ORG" "DOCKER_PASS" "DOCKER_USER"
         - run:
             name:       Install env stuff
             command:    echo 'export TAR_OPTIONS="-o"' >> ~/.bashrc && mix local.hex --force && mix local.rebar --force
@@ -567,9 +567,34 @@ defmodule Mix.Tasks.Boilex.Init do
         - run:
             name:       Push image to docker hub
             command:    ./scripts/ci/docker-push.sh $CIRCLE_TAG
+    doc:
+      <<: *defaults
+      steps:
+        - checkout
         - run:
-            name:       Compile dependencies
-            command:    mix deps.compile
+            name:       Check variables
+            command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" "CONFLUENCE_SECRET"
+        - run:
+            name:       Install env stuff
+            command:    echo 'export TAR_OPTIONS="-o"' >> ~/.bashrc && mix local.hex --force && mix local.rebar --force
+        - run:
+            name:       Update apt-get
+            command:    apt-get update -y
+        - run:
+            name:       Install zip
+            command:    apt-get install zip unzip -y
+        - run:
+            name:       Setup robot SSH key
+            command:    echo "$ROBOT_SSH_KEY" | base64 --decode > $HOME/.ssh/id_rsa.robot && chmod 600 $HOME/.ssh/id_rsa.robot && ssh-add $HOME/.ssh/id_rsa.robot
+        - run:
+           name:        Setup SSH config
+           command:     echo -e "Host *\\n IdentityFile $HOME/.ssh/id_rsa.robot\\n IdentitiesOnly yes" > $HOME/.ssh/config
+        - run:
+            name:       Fetch submodules
+            command:    git submodule update --init --recursive
+        - run:
+            name:       Fetching dependencies
+            command:    mix deps.get
         - run:
             name:       Compile protocols
             command:    mix compile.protocols --warnings-as-errors
@@ -588,16 +613,30 @@ defmodule Mix.Tasks.Boilex.Init do
             filters:
               branches:
                 only: /^([A-Z]{2,}-[0-9]+|hotfix-.+)$/
-    test-n-build:
+    test-build:
       jobs:
         - test:
             filters:
               branches:
-                only: /^(build-*|master)$/
+                only: /^(build-*)$/
         - build:
             filters:
               branches:
-                only: /^(build-*|master)$/
+                only: /^(build-*)$/
+    test-build-doc:
+      jobs:
+        - test:
+            filters:
+              branches:
+                only: /^master$/
+        - build:
+            filters:
+              branches:
+                only: /^master$/
+        - doc:
+            filters:
+              branches:
+                only: /^master$/
   """
 
   embed_text :confluence_push, """
