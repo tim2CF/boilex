@@ -578,7 +578,7 @@ defmodule Mix.Tasks.Boilex.Init do
             command:    mix docs
         - run:
             name:       Push documentation to confluence
-            command:    ./scripts/ci/confluence.sh
+            command:    ./scripts/ci/confluence-push.sh
 
   workflows:
     version: 2
