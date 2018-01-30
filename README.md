@@ -50,7 +50,8 @@ Some system variables are required by some scripts, description of all variables
 - `CONFLUENCE_PAGE_ID` numeric id of project page, example: *mycompany.atlassian.net/wiki/spaces/PROJECT/pages/`323322444`/elixir-app*
 - `CONFLUENCE_SECRET` access token generated from atlassian login and password in the following way *`"#{login}:#{password}" |> Base.encode64`*, example: *`bG9naW46cGFzc3dvcmQ=`*
 
+Variables can be defined in `scripts/.env` file locally (useful for development) or globally in the system.
+
 ## TODO
 
-- `.circleci` yaml configs template
 - `scripts/release.sh` script bumps version, creates new release, changelog and pushes to github.
