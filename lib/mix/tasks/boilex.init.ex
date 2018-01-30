@@ -463,7 +463,6 @@ defmodule Mix.Tasks.Boilex.Init do
 
   embed_text :circleci_config, """
   defaults: &defaults
-    working_directory: ~/platform88-utils-behaviour
     docker:
       - image: elixir:1.6
 
