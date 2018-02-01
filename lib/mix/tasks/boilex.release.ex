@@ -18,7 +18,7 @@ defmodule Mix.Tasks.Boilex.Release do
   def run([release_kind]) do
     :ok = check_branch()
     Mix.shell.info("pull master")
-    {_, 0} = System.cmd("git", ["pull"])
+    {_, 0} = System.cmd("git", ["pull", "origin", "master"])
     [major, minor, patch] = "VERSION" |> File.read! |> String.trim |> String.split(".") |> Enum.map(&String.to_integer/1)
     new_version = case release_kind do
                     "major" -> [major + 1, 0, 0]
