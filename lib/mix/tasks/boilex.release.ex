@@ -25,6 +25,8 @@ defmodule Mix.Tasks.Boilex.Release do
                   end
                   |> Enum.join(".")
     new_version_git = "v#{new_version}"
+    Mix.shell.info("update changelog")
+    :ok = update_changelog(new_version_git)
     Mix.shell.info("bump VERSION #{new_version}")
     :ok = File.write!("VERSION", new_version)
     Mix.shell.info("commit changes to git repo")
@@ -55,6 +57,19 @@ defmodule Mix.Tasks.Boilex.Release do
         """
         |> raise
     end
+  end
+
+  defp update_changelog(new_version_git) do
+    try do
+      {_, 0} = System.cmd("github_changelog_generator", ["-v"])
+    catch
+      _,_ ->
+        Mix.shell.info("it seems github_changelog_generator is not installed.. trying to install it")
+        {_, 0} = System.cmd("gem", ["install", "github_changelog_generator"])
+    end
+    Mix.shell.info("update changelog")
+    {_, 0} = System.cmd("github_changelog_generator", ["--simple", "--future-release", new_version_git])
+    :ok
   end
 
 end
