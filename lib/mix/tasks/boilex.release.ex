@@ -39,9 +39,6 @@ defmodule Mix.Tasks.Boilex.Release do
     Mix.shell.info("push tag to git")
     {_, 0} = System.cmd("git", ["push", "origin", "master", "--tags"])
     Mix.shell.info("release #{new_version_git} has been created!")
-    #
-    # TODO
-    #
     :ok
   end
 
