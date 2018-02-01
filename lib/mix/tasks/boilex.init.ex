@@ -25,6 +25,7 @@ defmodule Mix.Tasks.Boilex.Init do
     create_directory  "priv"
     # dev tools configs
     create_file       "VERSION",                version_text()
+    create_file       "CHANGELOG.md",           changelog_text()
     create_file       "coveralls.json",         coveralls_simple_text()
     create_file       ".credo.exs",             credo_text()
     create_file       ".dialyzer_ignore",       dialyzer_ignore_text()
@@ -56,6 +57,8 @@ defmodule Mix.Tasks.Boilex.Init do
   embed_text :version, """
   0.1.0
   """
+
+  embed_text :changelog, ""
 
   embed_text :coveralls_simple, """
   {

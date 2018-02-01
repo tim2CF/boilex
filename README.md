@@ -28,6 +28,10 @@ mix boilex.init
 - `Credo` static code analysis tool will make your code pretty and consistent. Can be configured with `.credo.exs` file.
 - `scripts` directory contains auto-generated bash helper scripts.
 
+### boilex.release
+
+Script bumps version, creates new release, changelog and pushes new tag to github.
+
 ### boilex.ci
 
 Some mix tasks are made to use by CI. But of course tasks can be executed locally if needed. List of tasks:
@@ -57,7 +61,3 @@ Some system variables are required by some scripts, description of all variables
 - `CONFLUENCE_SECRET` access token generated from atlassian login and password in the following way *`"#{login}:#{password}" |> Base.encode64`*, example: *`bG9naW46cGFzc3dvcmQ=`*
 
 Variables can be defined in `scripts/.env` file locally (useful for development) or globally in the system.
-
-## TODO
-
-- `scripts/release.sh` script bumps version, creates new release, changelog and pushes to github.

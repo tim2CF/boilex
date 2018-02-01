@@ -25,7 +25,6 @@ defmodule Mix.Tasks.Boilex.Release do
                   end
                   |> Enum.join(".")
     new_version_git = "v#{new_version}"
-    Mix.shell.info("update changelog")
     :ok = update_changelog(new_version_git)
     Mix.shell.info("bump VERSION #{new_version}")
     :ok = File.write!("VERSION", new_version)
