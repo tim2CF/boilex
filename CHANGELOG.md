@@ -1,5 +1,15 @@
 # Change Log
 
+## [v0.1.6](https://github.com/tim2CF/boilex/tree/v0.1.6) (2018-02-01)
+[Full Changelog](https://github.com/tim2CF/boilex/compare/v0.1.5...v0.1.6)
+
+**Merged pull requests:**
+
+- fix changelog [\#1](https://github.com/tim2CF/boilex/pull/1) ([tim2CF](https://github.com/tim2CF))
+
+## [v0.1.5](https://github.com/tim2CF/boilex/tree/v0.1.5) (2018-02-01)
+[Full Changelog](https://github.com/tim2CF/boilex/compare/v0.1.4...v0.1.5)
+
 ## [v0.1.4](https://github.com/tim2CF/boilex/tree/v0.1.4) (2018-02-01)
 [Full Changelog](https://github.com/tim2CF/boilex/compare/v0.1.3...v0.1.4)
 
