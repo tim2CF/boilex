@@ -34,14 +34,14 @@
     # Usage
     ```
     cd ./myproject
-    mix #{mix_command}
+    mix #{mix_command} $args
     ```
     """
 
     @spec run(OptionParser.argv) :: :ok
-    def run(_) do
+    def run(args) do
       "#{:code.priv_dir :boilex}/#{unquote(script)}"
-      |> System.cmd([])
+      |> System.cmd(args)
       |> case do
         {_, 0} ->
           Mix.shell.info("mix task #{unquote(mix_command)} finished successfully")
