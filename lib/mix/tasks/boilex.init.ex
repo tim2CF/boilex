@@ -713,7 +713,6 @@ defmodule Mix.Tasks.Boilex.Init do
       {:dialyxir, "~> 0.5",               only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.18",                only: [:dev, :test], runtime: false},
       {:credo, "~> 0.8",                  only: [:dev, :test], runtime: false},
-      {:changex, "~> 0.1.1",              only: [:dev, :test], runtime: false},
       {:boilex, github: "tim2CF/boilex",  only: [:dev, :test], runtime: false},
 
 
