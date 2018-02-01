@@ -59,6 +59,6 @@ Some system variables are required by some scripts, description of all variables
 - `CONFLUENCE_SUBDOMAIN` first part of confluence domain name, example: *`mycompany`.atlassian.net/wiki/spaces/PROJECT/pages/323322444/elixir-app*
 - `CONFLUENCE_PAGE_ID` numeric id of project page, example: *mycompany.atlassian.net/wiki/spaces/PROJECT/pages/`323322444`/elixir-app*
 - `CONFLUENCE_SECRET` access token generated from atlassian login and password in the following way *`"#{login}:#{password}" |> Base.encode64`*, example: *`bG9naW46cGFzc3dvcmQ=`*
-- `CHANGELOG_GITHUB_TOKEN` is token for *github_changelog_generator* utility. GitHub only allows 50 unauthenticated requests per hour. 
+- `CHANGELOG_GITHUB_TOKEN` is token for *github_changelog_generator* utility. Token is **required** for private repos. Reference is [HERE](https://github.com/skywinder/github-changelog-generator#github-token).
 
 Variables can be defined in `scripts/.env` file locally (useful for development) or globally in the system.
