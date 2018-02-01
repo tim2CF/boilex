@@ -549,20 +549,23 @@ defmodule Mix.Tasks.Boilex.Init do
             command:    git submodule update --init --recursive
         - setup_remote_docker
         - run:
+            name:       Fetching dependencies
+            command:    mix deps.get && MIX_ENV=staging mix deps.get && MIX_ENV=prod mix deps.get
+        - run:
+            name:       Compile protocols
+            command:    mix compile.protocols --warnings-as-errors
+        - run:
             name:       Install Docker client
-            command:    ./scripts/ci/install-docker-client.sh
+            command:    mix boilex.ci.docker.client.install
         - run:
             name:       Login to docker
             command:    docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
         - run:
-            name:       Fetching dependencies
-            command:    mix deps.get && MIX_ENV=staging mix deps.get && MIX_ENV=prod mix deps.get
-        - run:
             name:       Building docker image
-            command:    ./scripts/ci/docker-build.sh $CIRCLE_TAG
+            command:    export $(cat "./scripts/.env" | xargs) && mix boilex.ci.docker.build $CIRCLE_TAG
         - run:
             name:       Push image to docker hub
-            command:    ./scripts/ci/docker-push.sh $CIRCLE_TAG
+            command:    export $(cat "./scripts/.env" | xargs) && mix boilex.ci.docker.push $CIRCLE_TAG
     doc:
       <<: *defaults
       steps:
@@ -599,7 +602,7 @@ defmodule Mix.Tasks.Boilex.Init do
             command:    mix docs
         - run:
             name:       Push documentation to confluence
-            command:    ./scripts/ci/confluence-push.sh
+            command:    export $(cat "./scripts/.env" | xargs) && mix boilex.ci.confluence.push
 
   workflows:
     version: 2
