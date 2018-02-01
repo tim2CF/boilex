@@ -30,7 +30,11 @@ mix boilex.init
 
 ### boilex.ci
 
-Some mix tasks are made to use by CI. But of course tasks can be executed locally if needed. List of tasks `mix help | grep "boilex\.ci"`.
+Some mix tasks are made to use by CI. But of course tasks can be executed locally if needed. List of tasks:
+
+```
+mix help | grep "boilex\.ci"
+```
 
 ### scripts
 
