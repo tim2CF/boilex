@@ -30,7 +30,7 @@ defmodule Mix.Tasks.Boilex.Release do
     Mix.shell.info("commit changes to git repo")
     {_, 0} = System.cmd("git", ["commit", "-am", new_version_comment, "-n"])
     Mix.shell.info("create new tag")
-    {_, 0} = System.cmd("git", ["tag", "-a", "v#{new_version}", "-m", new_version_comment, "-n"])
+    {_, 0} = System.cmd("git", ["tag", "-a", "v#{new_version}", "-m", new_version_comment])
     Mix.shell.info("push changes to git")
     {_, 0} = System.cmd("git", ["push", "origin", "master"])
     Mix.shell.info("push tag to git")
