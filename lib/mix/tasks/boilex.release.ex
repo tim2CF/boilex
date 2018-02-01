@@ -17,6 +17,8 @@ defmodule Mix.Tasks.Boilex.Release do
   @spec run(OptionParser.argv) :: :ok
   def run([release_kind]) do
     :ok = check_branch()
+    Mix.shell.info("pull master")
+    {_, 0} = System.cmd("git", ["pull"])
     [major, minor, patch] = "VERSION" |> File.read! |> String.trim |> String.split(".") |> Enum.map(&String.to_integer/1)
     new_version = case release_kind do
                     "major" -> [major + 1, 0, 0]
@@ -25,9 +27,9 @@ defmodule Mix.Tasks.Boilex.Release do
                   end
                   |> Enum.join(".")
     new_version_git = "v#{new_version}"
-    :ok = update_changelog(new_version_git)
     Mix.shell.info("bump VERSION #{new_version}")
     :ok = File.write!("VERSION", new_version)
+    :ok = update_changelog(new_version_git)
     Mix.shell.info("commit changes to git repo")
     {_, 0} = System.cmd("git", ["commit", "-am", new_version_git, "-n"])
     Mix.shell.info("create new tag")
@@ -67,7 +69,7 @@ defmodule Mix.Tasks.Boilex.Release do
         {_, 0} = System.cmd("gem", ["install", "github_changelog_generator"])
     end
     Mix.shell.info("update changelog")
-    {_, 0} = System.cmd("github_changelog_generator", ["--simple", "--future-release", new_version_git])
+    {_, 0} = System.cmd("github_changelog_generator", ["--future-release", new_version_git])
     :ok
   end
 
