@@ -4,7 +4,7 @@ defmodule Boilex.MixProject do
   def project do
     [
       app: :boilex,
-      version: "0.1.0",
+      version: ("VERSION" |> File.read! |> String.trim),
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       deps: deps()

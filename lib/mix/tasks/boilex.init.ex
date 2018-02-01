@@ -24,7 +24,7 @@ defmodule Mix.Tasks.Boilex.Init do
     # priv dir for usage in Elixir code
     create_directory  "priv"
     # dev tools configs
-    create_file       "VERSION.txt",            version_text()
+    create_file       "VERSION",                version_text()
     create_file       "coveralls.json",         coveralls_simple_text()
     create_file       ".credo.exs",             credo_text()
     create_file       ".dialyzer_ignore",       dialyzer_ignore_text()
@@ -673,7 +673,7 @@ defmodule Mix.Tasks.Boilex.Init do
     #{IO.ANSI.green}
 
 
-      version: ("VERSION.txt" |> File.read! |> String.trim),
+      version: ("VERSION" |> File.read! |> String.trim),
 
 
     #{IO.ANSI.cyan}
