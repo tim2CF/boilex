@@ -24,18 +24,18 @@ defmodule Mix.Tasks.Boilex.Release do
                     "patch" -> [major, minor, patch + 1]
                   end
                   |> Enum.join(".")
-    new_version_comment = "\"release v#{new_version}\""
-    Mix.shell.info("bump version to #{new_version}")
+    new_version_git = "v#{new_version}"
+    Mix.shell.info("bump VERSION #{new_version}")
     :ok = File.write!("VERSION", new_version)
     Mix.shell.info("commit changes to git repo")
-    {_, 0} = System.cmd("git", ["commit", "-am", new_version_comment, "-n"])
+    {_, 0} = System.cmd("git", ["commit", "-am", new_version_git, "-n"])
     Mix.shell.info("create new tag")
-    {_, 0} = System.cmd("git", ["tag", "-a", "v#{new_version}", "-m", new_version_comment])
+    {_, 0} = System.cmd("git", ["tag", "-a", new_version_git, "-m", new_version_git])
     Mix.shell.info("push changes to git")
     {_, 0} = System.cmd("git", ["push", "origin", "master"])
     Mix.shell.info("push tag to git")
     {_, 0} = System.cmd("git", ["push", "origin", "master", "--tags"])
-    Mix.shell.info("release #{new_version} has been created!")
+    Mix.shell.info("release #{new_version_git} has been created!")
     #
     # TODO
     #
