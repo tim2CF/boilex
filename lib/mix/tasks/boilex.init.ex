@@ -565,10 +565,10 @@ defmodule Mix.Tasks.Boilex.Init do
             command:    docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
         - run:
             name:       Building docker image
-            command:    export $(cat "./scripts/.env" | xargs) && mix boilex.ci.docker.build $CIRCLE_TAG
+            command:    export $(cat "./scripts/.env" | xargs) && mix boilex.ci.docker.build "$CIRCLE_TAG"
         - run:
             name:       Push image to docker hub
-            command:    export $(cat "./scripts/.env" | xargs) && mix boilex.ci.docker.push $CIRCLE_TAG
+            command:    export $(cat "./scripts/.env" | xargs) && mix boilex.ci.docker.push "$CIRCLE_TAG"
     doc:
       <<: *defaults
       steps:
@@ -605,7 +605,7 @@ defmodule Mix.Tasks.Boilex.Init do
             command:    mix docs
         - run:
             name:       Push documentation to confluence
-            command:    export $(cat "./scripts/.env" | xargs) && mix boilex.ci.confluence.push
+            command:    export $(cat "./scripts/.env" | xargs) && mix boilex.ci.confluence.push "$CIRCLE_TAG"
 
   workflows:
     version: 2
@@ -629,14 +629,20 @@ defmodule Mix.Tasks.Boilex.Init do
       jobs:
         - test:
             filters:
+              tags:
+                only: /.*/
               branches:
                 only: /^master$/
         - build:
             filters:
+              tags:
+                only: /.*/
               branches:
                 only: /^master$/
         - doc:
             filters:
+              tags:
+                only: /.*/
               branches:
                 only: /^master$/
   """

@@ -2,12 +2,20 @@
 
 set -e
 
+TAG="$1"
+
+if [ "$TAG" == "" ]; then
+  echo "application tag is not provided as first argument"
+  exit 1
+fi
+
+
 script_file="$0"
 scripts_dir="$(dirname -- "$script_file")"
 "$scripts_dir/check-vars.sh" "in .env file or in system" "ERLANG_OTP_APPLICATION" "CONFLUENCE_SUBDOMAIN" "CONFLUENCE_PAGE_ID" "CONFLUENCE_SECRET"
 
 ERLANG_OTP_APPLICATION_DASH="${ERLANG_OTP_APPLICATION//_/-}"
-ERLANG_DOC_DIRNAME="$ERLANG_OTP_APPLICATION_DASH-$(cat VERSION.txt)-doc"
+ERLANG_DOC_DIRNAME="$ERLANG_OTP_APPLICATION_DASH-$TAG-doc"
 ERLANG_DOC_ARCHIVE="$ERLANG_DOC_DIRNAME.zip"
 
 echo "confluence: cp documentation directory"

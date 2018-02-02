@@ -1,6 +1,18 @@
 # Boilex
 
-Boilex is mix task to generate Elixir project development tools configuration boilerplate.
+Boilex is mix-based Elixir development tool. It
+
+- generates dev tools configurations for
+  - static bytecode analysis
+  - source code analysis
+  - test coverage analysis
+- generates Circleci configurations for
+  - testing
+  - building docker images + pushing to Dockerhub
+  - building project documentation + pushing to Confluence
+- generates Docker configurations
+- generates development scripts (for remote debugging etc)
+- provides releases versioning
 
 ## Installation
 
