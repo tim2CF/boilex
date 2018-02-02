@@ -68,13 +68,13 @@ mix help | grep "boilex\.ci"
 
 Some system variables are required by some scripts, description of all variables
 
-- `ERLANG_HOST` remote hostname to connect, example: *`www.elixir-app.com`*
-- `ERLANG_OTP_APPLICATION` lowercase and snakecase standard OTP application name, example: *`elixir_app`*
-- `ERLANG_COOKIE` remote Erlang node cookie, example: *`OEBy/p9vFWi85XTeYOUvIwLr/sZctkHPKWNxfTtf81M=`*
-- `ENABLE_DIALYZER` run Dialyzer checks in pre-commit hooks or not, example: *`false`*
-- `CONFLUENCE_SUBDOMAIN` first part of confluence domain name, example: *`mycompany`.atlassian.net/wiki/spaces/PROJECT/pages/323322444/elixir-app*
-- `CONFLUENCE_PAGE_ID` numeric id of project page, example: *mycompany.atlassian.net/wiki/spaces/PROJECT/pages/`323322444`/elixir-app*
-- `CONFLUENCE_SECRET` access token generated from atlassian login and password in the following way *`"#{login}:#{password}" |> Base.encode64`*, example: *`bG9naW46cGFzc3dvcmQ=`*
+- `ERLANG_HOST` remote hostname to connect, example: **www.elixir-app.com**
+- `ERLANG_OTP_APPLICATION` lowercase and snakecase standard OTP application name, example: **elixir_app**
+- `ERLANG_COOKIE` remote Erlang node cookie, example: **OEBy/p9vFWi85XTeYOUvIwLr/sZctkHPKWNxfTtf81M=**
+- `ENABLE_DIALYZER` run Dialyzer checks in pre-commit hooks or not, example: **false**
+- `CONFLUENCE_SUBDOMAIN` first part of confluence domain name, example: **mycompany**.atlassian.net/wiki/spaces/PROJECT/pages/323322444/elixir-app
+- `CONFLUENCE_PAGE_ID` numeric id of project page, example: mycompany.atlassian.net/wiki/spaces/PROJECT/pages/**323322444**/elixir-app
+- `CONFLUENCE_SECRET` access token generated from atlassian login and password in the following way *`"#{login}:#{password}" |> Base.encode64`*, example: **bG9naW46cGFzc3dvcmQ=**
 - `CHANGELOG_GITHUB_TOKEN` is token for *github_changelog_generator* utility. Token is **required** for private repos. Reference is [HERE](https://github.com/skywinder/github-changelog-generator#github-token).
 
 Variables can be defined in `scripts/.env` file locally (useful for development) or globally in the system.
