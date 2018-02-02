@@ -42,7 +42,11 @@ mix boilex.init
 
 ### boilex.release
 
-Script bumps version, creates new release, changelog and pushes new tag to github.
+Script bumps version, creates new release, updates changelog and pushes new tag to github. Argument is one of `patch | minor | major`. Example:
+
+```
+mix boilex.release patch
+```
 
 ### boilex.ci
 
