@@ -5,8 +5,9 @@ set -e
 TAG="$1"
 
 if [ "$TAG" == "" ]; then
-  echo "application tag is not provided as first argument"
-  exit 1
+  TAG=$(git rev-parse --abbrev-ref HEAD | cut -f2 -d"/")
+  TAG=${branch:-master}
+  echo "application tag is not provided, use $TAG as tag"
 fi
 
 
