@@ -40,6 +40,7 @@ defmodule Mix.Tasks.Boilex.Init do
     create_script     "scripts/remote-iex.sh",  remote_iex_text()
     create_script     "scripts/cluster-iex.sh", cluster_iex_text()
     create_script     "scripts/check-vars.sh",  check_vars_text()
+    create_script     "scripts/show-vars.sh",   show_vars_text()
     create_script     "scripts/docs.sh",        docs_text()
     create_script     "scripts/coverage.sh",    coverage_text()
     create_script     "scripts/start.sh",       start_text()
@@ -275,6 +276,7 @@ defmodule Mix.Tasks.Boilex.Init do
       MIX_ENV=prod  mix compile.protocols
 
   CMD echo "Checking system variables..." && \\
+      scripts/show-vars.sh "MIX_ENV" "ERLANG_OTP_APPLICATION" "ERLANG_HOST" "ERLANG_MIN_PORT" "ERLANG_MAX_PORT" "ERLANG_MAX_PROCESSES" "ERLANG_COOKIE" && \\
       scripts/check-vars.sh "in system" "MIX_ENV" "ERLANG_OTP_APPLICATION" "ERLANG_HOST" "ERLANG_MIN_PORT" "ERLANG_MAX_PORT" "ERLANG_MAX_PROCESSES" "ERLANG_COOKIE" && \\
       echo "Running app..." && \\
       elixir \\
@@ -422,6 +424,21 @@ defmodule Mix.Tasks.Boilex.Init do
         exit 1
     fi
   done
+  """
+
+  embed_text :show_vars, """
+  #!/bin/bash
+
+  set -e
+
+  variables=( "$@" )
+
+  echo ""
+  for varname in "${variables[@]}"
+  do
+    echo "$varname=${!varname}"
+  done
+  echo ""
   """
 
   embed_text :docs, """
