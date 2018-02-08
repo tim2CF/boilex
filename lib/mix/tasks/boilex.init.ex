@@ -133,7 +133,7 @@ defmodule Mix.Tasks.Boilex.Init do
           # For some checks, like AliasUsage, you can only customize the priority
           # Priority values are: `low, normal, high, higher`
           #
-          {Credo.Check.Design.AliasUsage, priority: :low, exit_status: 0},
+          {Credo.Check.Design.AliasUsage, false},
 
           # For others you can set parameters
 
