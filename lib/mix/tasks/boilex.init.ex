@@ -152,7 +152,7 @@ defmodule Mix.Tasks.Boilex.Init do
 
           {Credo.Check.Readability.FunctionNames},
           {Credo.Check.Readability.LargeNumbers},
-          {Credo.Check.Readability.MaxLineLength, priority: :normal, max_length: 120, exit_status: 0},
+          {Credo.Check.Readability.MaxLineLength, false},
           {Credo.Check.Readability.ModuleAttributeNames},
           {Credo.Check.Readability.ModuleDoc, false},
           {Credo.Check.Readability.ModuleNames, priority: :high},
