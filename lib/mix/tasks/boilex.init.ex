@@ -26,7 +26,7 @@ defmodule Mix.Tasks.Boilex.Init do
     # dev tools configs
     create_file       "VERSION",                version_text()
     create_file       "CHANGELOG.md",           changelog_text()
-    create_file       "coveralls.json",         coveralls_simple_text()
+    create_file       "coveralls.json",         coveralls_simple_template(assigns)
     create_file       ".credo.exs",             credo_text()
     create_file       ".dialyzer_ignore",       dialyzer_ignore_text()
     create_file       ".editorconfig",          editorconfig_text()
@@ -61,14 +61,21 @@ defmodule Mix.Tasks.Boilex.Init do
 
   embed_text :changelog, ""
 
-  embed_text :coveralls_simple, """
+  embed_template :coveralls_simple, """
   {
     "coverage_options": {
       "treat_no_relevant_lines_as_covered": false,
       "minimum_coverage": 100
     },
     "skip_files": [
+      "test/*",
 
+      "lib/<%= @otp_application %>_web.ex",
+      "lib/<%= @otp_application %>/application.ex",
+      "lib/<%= @otp_application %>/repo.ex",
+
+      "lib/<%= @otp_application %>_web/endpoint.ex",
+      "lib/<%= @otp_application %>_web/router.ex"
     ]
   }
   """
