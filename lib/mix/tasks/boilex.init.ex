@@ -690,7 +690,7 @@ defmodule Mix.Tasks.Boilex.Init do
         Mix.shell.error("Empty OTP application name!")
         fetch_otp_application_name()
       name ->
-        case Regex.match?(~r/^[a-z][0-9a-z_]+[a-z]$/, name)  do
+        case Regex.match?(~r/^[a-z][0-9a-z_]*[0-9a-z]$/, name)  do
           true -> name
           false ->
             Mix.shell.error("Invalid OTP application name!")
