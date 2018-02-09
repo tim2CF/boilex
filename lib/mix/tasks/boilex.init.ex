@@ -209,7 +209,7 @@ defmodule Mix.Tasks.Boilex.Init do
           {Credo.Check.Refactor.AppendSingleItem, priority: :normal},
           {Credo.Check.Refactor.VariableRebinding, priority: :normal},
           {Credo.Check.Warning.MapGetUnsafePass, priority: :high, exit_status: 0},
-          {Credo.Check.Consistency.MultiAliasImportRequireUse, priority: :normal, exit_status: 0},
+          {Credo.Check.Consistency.MultiAliasImportRequireUse, false},
 
           # Deprecated checks (these will be deleted after a grace period)
           #
