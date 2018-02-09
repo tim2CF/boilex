@@ -757,6 +757,12 @@ defmodule Mix.Tasks.Boilex.Init do
       {:credo, "~> 0.8",                  only: [:dev, :test], runtime: false},
       {:boilex, github: "tim2CF/boilex",  only: [:dev, :test], runtime: false},
 
+    #{IO.ANSI.cyan}
+    ADD THE FOLLOWING LINES TO `.gitignore` FILE
+    #{IO.ANSI.green}
+
+      /doc
+      /cover
 
     #{IO.ANSI.reset}
     Please configure `scripts/.env` file if you want to use distributed erlang features in development process.
