@@ -51,7 +51,7 @@
 
           #{msg}
           """
-          |> Mix.shell.error
+          |> raise
       end
     end
   end
