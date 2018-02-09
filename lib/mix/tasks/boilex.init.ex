@@ -276,8 +276,22 @@ defmodule Mix.Tasks.Boilex.Init do
       MIX_ENV=prod  mix compile.protocols
 
   CMD echo "Checking system variables..." && \\
-      scripts/show-vars.sh "MIX_ENV" "ERLANG_OTP_APPLICATION" "ERLANG_HOST" "ERLANG_MIN_PORT" "ERLANG_MAX_PORT" "ERLANG_MAX_PROCESSES" "ERLANG_COOKIE" && \\
-      scripts/check-vars.sh "in system" "MIX_ENV" "ERLANG_OTP_APPLICATION" "ERLANG_HOST" "ERLANG_MIN_PORT" "ERLANG_MAX_PORT" "ERLANG_MAX_PROCESSES" "ERLANG_COOKIE" && \\
+      scripts/show-vars.sh \\
+        "MIX_ENV" \\
+        "ERLANG_OTP_APPLICATION" \\
+        "ERLANG_HOST" \\
+        "ERLANG_MIN_PORT" \\
+        "ERLANG_MAX_PORT" \\
+        "ERLANG_MAX_PROCESSES" \\
+        "ERLANG_COOKIE" && \\
+      scripts/check-vars.sh "in system" \\
+        "MIX_ENV" \\
+        "ERLANG_OTP_APPLICATION" \\
+        "ERLANG_HOST" \\
+        "ERLANG_MIN_PORT" \\
+        "ERLANG_MAX_PORT" \\
+        "ERLANG_MAX_PROCESSES" \\
+        "ERLANG_COOKIE" && \\
       echo "Running app..." && \\
       elixir \\
         --name "$ERLANG_OTP_APPLICATION@$ERLANG_HOST" \\
@@ -295,14 +309,14 @@ defmodule Mix.Tasks.Boilex.Init do
 
   services:
     main:
-      image: "<%= @otp_application %>:latest"
+      image: "<%= @otp_application |> String.replace("_", "-") %>:master"
       ports:
         - "6666:4369"
         - "9100-9105:9100-9105"
       environment:
         MIX_ENV: staging
         ERLANG_OTP_APPLICATION: "<%= @otp_application %>"
-        ERLANG_HOST: "${DOCKER_HOST}"
+        ERLANG_HOST: "127.0.0.1"
         ERLANG_MIN_PORT: 9100
         ERLANG_MAX_PORT: 9105
         ERLANG_MAX_PROCESSES: 1000000
