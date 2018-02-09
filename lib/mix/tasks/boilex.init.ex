@@ -268,7 +268,6 @@ defmodule Mix.Tasks.Boilex.Init do
 
   embed_text :dockerfile, """
   FROM elixir:1.6
-  MAINTAINER DEFINE_ME
 
   # inotify-tools is dep for hot code-reloading, useful for development
   RUN apt-get update && apt-get install -y libssl1.0.0 inotify-tools
