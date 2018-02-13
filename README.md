@@ -78,3 +78,7 @@ Some system variables are required by some scripts, description of all variables
 - `CHANGELOG_GITHUB_TOKEN` is token for *github_changelog_generator* utility. Token is **required** for private repos. Reference is [HERE](https://github.com/skywinder/github-changelog-generator#github-token).
 
 Variables can be defined in `scripts/.env` file locally (useful for development) or globally in the system.
+
+# TODO
+
+- Include optional database schema picture to documentation. Schema should be generated using [schemacrawler](https://hub.docker.com/r/sualeh/schemacrawler/) docker image.
