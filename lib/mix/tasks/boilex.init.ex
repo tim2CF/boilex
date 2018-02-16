@@ -518,9 +518,6 @@ defmodule Mix.Tasks.Boilex.Init do
             name:       Check variables
             command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" "COVERALLS_REPO_TOKEN"
         - run:
-            name:       Install env stuff
-            command:    echo 'export TAR_OPTIONS="-o"' >> ~/.bashrc && mix local.hex --force && mix local.rebar --force
-        - run:
             name:       Setup robot SSH key
             command:    echo "$ROBOT_SSH_KEY" | base64 --decode > $HOME/.ssh/id_rsa.robot && chmod 600 $HOME/.ssh/id_rsa.robot && ssh-add $HOME/.ssh/id_rsa.robot
         - run:
@@ -580,9 +577,6 @@ defmodule Mix.Tasks.Boilex.Init do
             name:       Check variables
             command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" "DOCKER_EMAIL" "DOCKER_ORG" "DOCKER_PASS" "DOCKER_USER"
         - run:
-            name:       Install env stuff
-            command:    echo 'export TAR_OPTIONS="-o"' >> ~/.bashrc && mix local.hex --force && mix local.rebar --force
-        - run:
             name:       Setup robot SSH key
             command:    echo "$ROBOT_SSH_KEY" | base64 --decode > $HOME/.ssh/id_rsa.robot && chmod 600 $HOME/.ssh/id_rsa.robot && ssh-add $HOME/.ssh/id_rsa.robot
         - run:
@@ -597,9 +591,6 @@ defmodule Mix.Tasks.Boilex.Init do
         - run:
             name:       Compile protocols
             command:    mix compile.protocols --warnings-as-errors
-        - run:
-            name:       Install Docker client
-            command:    mix boilex.ci.docker.client.install
         - run:
             name:       Login to docker
             command:    docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
@@ -616,15 +607,6 @@ defmodule Mix.Tasks.Boilex.Init do
         - run:
             name:       Check variables
             command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" "CONFLUENCE_SECRET"
-        - run:
-            name:       Install env stuff
-            command:    echo 'export TAR_OPTIONS="-o"' >> ~/.bashrc && mix local.hex --force && mix local.rebar --force
-        - run:
-            name:       Update apt-get
-            command:    apt-get update -y
-        - run:
-            name:       Install zip
-            command:    apt-get install zip unzip -y
         - run:
             name:       Setup robot SSH key
             command:    echo "$ROBOT_SSH_KEY" | base64 --decode > $HOME/.ssh/id_rsa.robot && chmod 600 $HOME/.ssh/id_rsa.robot && ssh-add $HOME/.ssh/id_rsa.robot

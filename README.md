@@ -9,7 +9,7 @@ Boilex is mix-based Elixir development tool. It
 - generates Circleci configurations for
   - testing
   - building docker images + pushing to Dockerhub
-  - building project documentation + pushing to Confluence
+  - building project documentation + ERD + pushing to Confluence
 - generates Docker configurations
 - generates development scripts (for remote debugging etc)
 - provides releases versioning
