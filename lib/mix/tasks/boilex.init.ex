@@ -18,8 +18,13 @@ defmodule Mix.Tasks.Boilex.Init do
   def run(_) do
 
     otp_application = fetch_otp_application_name()
+    add_postgres    = Mix.shell.yes?("Include postgres stuff?")
     erlang_cookie   = :crypto.strong_rand_bytes(32) |> Base.encode64
-    assigns         = [otp_application: otp_application, erlang_cookie: erlang_cookie]
+    assigns         = [
+                        otp_application:  otp_application,
+                        erlang_cookie:    erlang_cookie,
+                        include_postgres: add_postgres,
+                      ]
 
     # priv dir for usage in Elixir code
     create_directory  "priv"
@@ -46,7 +51,7 @@ defmodule Mix.Tasks.Boilex.Init do
     create_script     "scripts/start.sh",       start_text()
     # circleci
     create_directory  ".circleci"
-    create_file       ".circleci/config.yml",   circleci_config_text()
+    create_file       ".circleci/config.yml",   circleci_config_template(assigns)
     # instructions
     :ok = todo_instructions() |> Mix.shell.info
   end
@@ -498,10 +503,10 @@ defmodule Mix.Tasks.Boilex.Init do
   # circleci
   #
 
-  embed_text :circleci_config, """
+  embed_template :circleci_config, """
   defaults: &defaults
     docker:
-      - image: elixir:1.6
+      - image: tim2cf/elixir-builder:1.6<%= if @include_postgres, do: "\n"<>postgres_circleci_image() %>
 
   version: 2
   jobs:
@@ -570,6 +575,7 @@ defmodule Mix.Tasks.Boilex.Init do
       <<: *defaults
       steps:
         - checkout
+        - setup_remote_docker
         - run:
             name:       Check variables
             command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" "DOCKER_EMAIL" "DOCKER_ORG" "DOCKER_PASS" "DOCKER_USER"
@@ -585,7 +591,6 @@ defmodule Mix.Tasks.Boilex.Init do
         - run:
             name:       Fetch submodules
             command:    git submodule update --init --recursive
-        - setup_remote_docker
         - run:
             name:       Fetching dependencies
             command:    mix deps.get && MIX_ENV=staging mix deps.get && MIX_ENV=prod mix deps.get
@@ -637,7 +642,7 @@ defmodule Mix.Tasks.Boilex.Init do
             command:    mix compile.protocols --warnings-as-errors
         - run:
             name:       Compile documentation
-            command:    mix docs
+            command:    mix docs<%= if @include_postgres, do: "\n"<>postgres_circleci_erd() %>
         - run:
             name:       Push documentation to confluence
             command:    export $(cat "./scripts/.env" | xargs) && mix boilex.ci.confluence.push "$CIRCLE_TAG"
@@ -777,6 +782,27 @@ defmodule Mix.Tasks.Boilex.Init do
   defp create_script(name, value) do
     create_file       name, value
     :ok = File.chmod  name, 0o755
+  end
+
+  defp postgres_circleci_image do
+    """
+          environment:
+            POSTGRES_URL: ecto://postgres:postgres@localhost/platform88
+        - image: circleci/postgres:9.6.5-alpine-ram
+    """
+    |> String.trim("\n")
+  end
+
+  defp postgres_circleci_erd do
+    """
+          - run:
+              name:       Setup test DB
+              command:    mix ecto.setup
+          - run:
+              name:       Generate database ERD
+              command:    export PROJECT_DIRECTORY="$(pwd)" && pushd /schemacrawler-14.19.01-distribution/_schemacrawler/ && ./schemacrawler.sh -server=postgresql -host=127.0.0.1 -user=postgres -password=postgres -database=platform88 -infolevel=standard -routines= -command=schema -outputformat=png -o "$PROJECT_DIRECTORY/doc/database-ERD.png" && popd
+    """
+    |> String.trim("\n")
   end
 
 end
