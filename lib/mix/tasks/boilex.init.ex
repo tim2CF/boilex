@@ -17,14 +17,14 @@ defmodule Mix.Tasks.Boilex.Init do
   @spec run(OptionParser.argv) :: :ok
   def run(_) do
 
-    otp_application = fetch_otp_application_name()
-    add_postgres    = Mix.shell.yes?("Include postgres stuff?")
-    erlang_cookie   = :crypto.strong_rand_bytes(32) |> Base.encode64
-    assigns         = [
+    otp_application  = fetch_otp_application_name()
+    include_postgres = Mix.shell.yes?("Include postgres stuff to CircleCI config?")
+    erlang_cookie    = :crypto.strong_rand_bytes(32) |> Base.encode64
+    assigns          = [
                         otp_application:  otp_application,
                         erlang_cookie:    erlang_cookie,
-                        include_postgres: add_postgres,
-                      ]
+                        include_postgres: include_postgres,
+                       ]
 
     # priv dir for usage in Elixir code
     create_directory  "priv"
@@ -53,7 +53,7 @@ defmodule Mix.Tasks.Boilex.Init do
     create_directory  ".circleci"
     create_file       ".circleci/config.yml",   circleci_config_template(assigns)
     # instructions
-    :ok = todo_instructions() |> Mix.shell.info
+    :ok = todo_instructions(assigns) |> Mix.shell.info
   end
 
   #
@@ -273,9 +273,6 @@ defmodule Mix.Tasks.Boilex.Init do
 
   embed_text :dockerfile, """
   FROM elixir:1.6
-
-  # inotify-tools is dep for hot code-reloading, useful for development
-  RUN apt-get update && apt-get install -y libssl1.0.0 inotify-tools
 
   WORKDIR /app
 
@@ -692,7 +689,7 @@ defmodule Mix.Tasks.Boilex.Init do
     end
   end
 
-  defp todo_instructions do
+  defp todo_instructions(assigns) do
     """
     #{IO.ANSI.magenta}
     *****************
@@ -726,10 +723,10 @@ defmodule Mix.Tasks.Boilex.Init do
       # dialyxir
       dialyzer:     [ignore_warnings: ".dialyzer_ignore"],
       # ex_doc
-      name:         "ELIXIR_APPLICATION_NAME",
-      source_url:   "GITHUB_URL",
-      homepage_url: "GITHUB_URL",
-      docs:         [main: "ELIXIR_APPLICATION_NAME", extras: ["README.md"]],
+      name:         "#{ assigns |> Keyword.get(:otp_application) |> Macro.camelize }",
+      source_url:   "TODO_PUT_HERE_GITHUB_URL",
+      homepage_url: "TODO_PUT_HERE_GITHUB_URL",
+      docs:         [main: "README", extras: ["README.md"]],
 
     #{IO.ANSI.cyan}
     ADD THE FOLLOWING PARAMETERS TO `deps` FUNCTION IN `mix.exs` FILE
