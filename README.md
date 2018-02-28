@@ -81,4 +81,6 @@ Variables can be defined in `scripts/.env` file locally (useful for development)
 
 # TODO
 
-- Include optional database schema picture to documentation. Schema should be generated using [schemacrawler](https://hub.docker.com/r/sualeh/schemacrawler/) docker image.
+- Add standard project template generator.
+- Add phoenix project generator with option "--without-crap" to avoid JS, CSS, other unnecessary static stuff and unnecessary Elixir code.
+- Make files generator more configurable.
