@@ -755,13 +755,14 @@ defmodule Mix.Tasks.Boilex.Init do
     If your project is OTP application (not just library),
     probably you would like to add `stop` function to your
     `application.ex` file to prevent situations when
-    erlang node continue to run after your
-    application stopped (because of some reason). Example:
+    erlang node continue to run while your
+    application has been stopped (because of some reason). Example:
     #{IO.ANSI.green}
 
 
       def stop(reason) do
-        Logger.error("\#{__MODULE__} application is stopped, trying to shutdown erlang node ...", reason: reason)
+        "\#{__MODULE__} application is stopped, trying to shutdown erlang node ..."
+        |> Logger.error([reason: reason])
         :init.stop()
       end
 
