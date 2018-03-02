@@ -761,7 +761,7 @@ defmodule Mix.Tasks.Boilex.Init do
 
 
       def stop(reason) do
-        Logger.error("#{__MODULE__} application is stopped, trying to shutdown erlang node ...", reason: reason)
+        Logger.error("\#{__MODULE__} application is stopped, trying to shutdown erlang node ...", reason: reason)
         :init.stop()
       end
 
