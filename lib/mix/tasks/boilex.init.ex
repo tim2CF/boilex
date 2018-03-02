@@ -728,6 +728,7 @@ defmodule Mix.Tasks.Boilex.Init do
       homepage_url: "TODO_PUT_HERE_GITHUB_URL",
       docs:         [main: "README", extras: ["README.md"]],
 
+
     #{IO.ANSI.cyan}
     ADD THE FOLLOWING PARAMETERS TO `deps` FUNCTION IN `mix.exs` FILE
     #{IO.ANSI.green}
@@ -740,14 +741,32 @@ defmodule Mix.Tasks.Boilex.Init do
       {:credo, "~> 0.8",                  only: [:dev, :test], runtime: false},
       {:boilex, github: "tim2CF/boilex",  only: [:dev, :test], runtime: false},
 
+
     #{IO.ANSI.cyan}
     ADD THE FOLLOWING LINES TO `.gitignore` FILE
     #{IO.ANSI.green}
 
+
       /doc
       /cover
 
-    #{IO.ANSI.reset}
+
+    #{IO.ANSI.cyan}
+    If your project is OTP application (not just library),
+    probably you would like to add `stop` function to your
+    `application.ex` file to prevent situations when
+    erlang node continue to run after your
+    application stopped (because of some reason). Example:
+    #{IO.ANSI.green}
+
+
+      def stop(reason) do
+        Logger.error("#{__MODULE__} application is stopped, trying to shutdown erlang node ...", reason: reason)
+        :init.stop()
+      end
+
+
+    #{IO.ANSI.cyan}
     Please configure `scripts/.env` file if you want to use distributed erlang features in development process.
 
     #{IO.ANSI.magenta}
