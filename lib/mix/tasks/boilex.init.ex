@@ -731,6 +731,7 @@ defmodule Mix.Tasks.Boilex.Init do
       description:  "TODO_ADD_DESCRIPTION",
       package: [
         licenses: ["Apache 2.0"],
+        files: ["lib", "priv", "mix.exs", "README*", "VERSION*"],
         maintainers: ["TODO_ADD_MAINTAINER"],
         links: %{
           "GitHub" => "TODO_PUT_HERE_GITHUB_URL",
