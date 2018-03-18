@@ -726,7 +726,17 @@ defmodule Mix.Tasks.Boilex.Init do
       name:         "#{ assigns |> Keyword.get(:otp_application) |> Macro.camelize }",
       source_url:   "TODO_PUT_HERE_GITHUB_URL",
       homepage_url: "TODO_PUT_HERE_GITHUB_URL",
-      docs:         [main: "README", extras: ["README.md"]],
+      docs:         [main: "readme", extras: ["README.md"]],
+      # hex.pm stuff
+      description:  "TODO_ADD_DESCRIPTION",
+      package: [
+        licenses: ["Apache 2.0"],
+        maintainers: ["TODO_ADD_MAINTAINER"],
+        links: %{
+          "GitHub" => "TODO_PUT_HERE_GITHUB_URL",
+          "Author's home page" => "TODO_PUT_HERE_HOMEPAGE_URL",
+        }
+      ],
 
 
     #{IO.ANSI.cyan}
@@ -739,7 +749,7 @@ defmodule Mix.Tasks.Boilex.Init do
       {:dialyxir, "~> 0.5",               only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.18",                only: [:dev, :test], runtime: false},
       {:credo, "~> 0.8",                  only: [:dev, :test], runtime: false},
-      {:boilex, github: "tim2CF/boilex",  only: [:dev, :test], runtime: false},
+      {:boilex, "~> 0.1.6",               only: [:dev, :test], runtime: false},
 
 
     #{IO.ANSI.cyan}

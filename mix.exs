@@ -13,6 +13,7 @@ defmodule Boilex.MixProject do
       source_url: "https://github.com/tim2CF/boilex",
       package: [
         licenses: ["Apache 2.0"],
+        files: ["lib", "priv", "mix.exs", "README*", "LICENSE*", "VERSION*"],
         maintainers: ["Ilja Tkachuk aka timCF"],
         links: %{
           "GitHub" => "https://github.com/tim2CF/boilex",
