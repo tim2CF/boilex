@@ -19,7 +19,12 @@ Boilex is mix-based Elixir development tool. It
 Add the following parameters to `deps` function in `mix.exs` file
 
 ```
-{:boilex, github: "tim2CF/boilex", only: [:dev, :test], runtime: false},
+# development tools
+{:excoveralls, "~> 0.8", only: [:dev, :test], runtime: false},
+{:dialyxir, "~> 0.5",    only: [:dev, :test], runtime: false},
+{:ex_doc, "~> 0.18",     only: [:dev, :test], runtime: false},
+{:credo, "~> 0.8",       only: [:dev, :test], runtime: false},
+{:boilex, "~> 0.1.6",    only: [:dev, :test], runtime: false},
 ```
 
 ## Usage

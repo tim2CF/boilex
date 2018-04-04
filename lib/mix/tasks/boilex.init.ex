@@ -741,19 +741,6 @@ defmodule Mix.Tasks.Boilex.Init do
 
 
     #{IO.ANSI.cyan}
-    ADD THE FOLLOWING PARAMETERS TO `deps` FUNCTION IN `mix.exs` FILE
-    #{IO.ANSI.green}
-
-
-      # development tools
-      {:excoveralls, "~> 0.8",            only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 0.5",               only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.18",                only: [:dev, :test], runtime: false},
-      {:credo, "~> 0.8",                  only: [:dev, :test], runtime: false},
-      {:boilex, "~> 0.1.6",               only: [:dev, :test], runtime: false},
-
-
-    #{IO.ANSI.cyan}
     ADD THE FOLLOWING LINES TO `.gitignore` FILE
     #{IO.ANSI.green}
 
