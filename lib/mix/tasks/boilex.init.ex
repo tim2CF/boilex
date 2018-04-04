@@ -35,6 +35,7 @@ defmodule Mix.Tasks.Boilex.Init do
     create_file       ".credo.exs",             credo_text()
     create_file       ".dialyzer_ignore",       dialyzer_ignore_text()
     create_file       ".editorconfig",          editorconfig_text()
+    create_file       ".formatter.exs",         formatter_text()
     # docker stuff
     create_file       "Dockerfile",             dockerfile_text()
     create_file       "docker-compose.yml",     docker_compose_template(assigns)
@@ -265,6 +266,37 @@ defmodule Mix.Tasks.Boilex.Init do
   [*.json]
   indent_style = space
   indent_size = 2
+  """
+
+  embed_text :formatter, """
+  [
+    inputs: [".credo.exs", ".formatter.exs", "mix.exs", "{config,lib,priv,rel,test}/**/*.{ex,exs}"],
+    line_length: 140,
+    locals_without_parens: [
+      # Ecto
+
+      ## schema
+      field: :*,
+      belongs_to: :*,
+      has_one: :*,
+      has_many: :*,
+      many_to_many: :*,
+      embeds_one: :*,
+      embeds_many: :*,
+
+      ## migration
+      create: :*,
+      create_if_not_exists: :*,
+      alter: :*,
+      drop: :*,
+      drop_if_exists: :*,
+      rename: :*,
+      add: :*,
+      remove: :*,
+      modify: :*,
+      execute: :*
+    ]
+  ]
   """
 
   #
