@@ -753,7 +753,12 @@ defmodule Mix.Tasks.Boilex.Init do
         "coveralls.html":       :test,
       ],
       # dialyxir
-      dialyzer:     [ignore_warnings: ".dialyzer_ignore"],
+      dialyzer: [
+        ignore_warnings: ".dialyzer_ignore",
+        plt_add_apps: [
+          :mix
+        ]
+      ],
       # ex_doc
       name:         "#{ assigns |> Keyword.get(:otp_application) |> Macro.camelize }",
       source_url:   "TODO_PUT_HERE_GITHUB_URL",
