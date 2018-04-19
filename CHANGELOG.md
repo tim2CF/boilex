@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.1.7](https://github.com/tim2CF/boilex/tree/v0.1.7) (2018-04-19)
+[Full Changelog](https://github.com/tim2CF/boilex/compare/v0.1.6...v0.1.7)
+
+**Merged pull requests:**
+
+- Added Phoenix and Ecto macro parens exclusion [\#2](https://github.com/tim2CF/boilex/pull/2) ([mlamp](https://github.com/mlamp))
+
 ## [v0.1.6](https://github.com/tim2CF/boilex/tree/v0.1.6) (2018-02-01)
 [Full Changelog](https://github.com/tim2CF/boilex/compare/v0.1.5...v0.1.6)
 
