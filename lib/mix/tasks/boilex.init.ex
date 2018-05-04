@@ -50,6 +50,7 @@ defmodule Mix.Tasks.Boilex.Init do
     create_script     "scripts/docs.sh",        docs_text()
     create_script     "scripts/coverage.sh",    coverage_text()
     create_script     "scripts/start.sh",       start_text()
+    create_script     "scripts/docker-iex.sh",  docker_iex_template(assigns)
     # circleci
     create_directory  ".circleci"
     create_file       ".circleci/config.yml",   circleci_config_template(assigns)
@@ -351,8 +352,8 @@ defmodule Mix.Tasks.Boilex.Init do
     main:
       image: "<%= @otp_application |> String.replace("_", "-") %>:master"
       ports:
-        - "6666:4369"
-        - "9100-9105:9100-9105"
+        # - "4369:4369"         # EPMD
+        - "9100-9105:9100-9105" # Distributed Erlang
       environment:
         MIX_ENV: staging
         ERLANG_OTP_APPLICATION: "<%= @otp_application %>"
@@ -379,7 +380,7 @@ defmodule Mix.Tasks.Boilex.Init do
   #
 
   embed_template :env, """
-  ERLANG_HOST=
+  ERLANG_HOST=127.0.0.1
   ERLANG_OTP_APPLICATION="<%= @otp_application %>"
   ERLANG_COOKIE="<%= @erlang_cookie %>"
   ENABLE_DIALYZER=false
@@ -429,7 +430,7 @@ defmodule Mix.Tasks.Boilex.Init do
 
   iex \\
     --remsh "$ERLANG_OTP_APPLICATION@$ERLANG_HOST" \\
-    --name "$USER-remote-$(date +%s)@$ERLANG_HOST" \\
+    --name "remote-$(date +%s)@$ERLANG_HOST" \\
     --cookie "$ERLANG_COOKIE" \\
     --erl "+K true +A 32" \\
     --erl "-kernel inet_dist_listen_min 9100" \\
@@ -447,7 +448,7 @@ defmodule Mix.Tasks.Boilex.Init do
   "$scripts_dir/check-vars.sh" "in scripts/.env file" "ERLANG_HOST" "ERLANG_OTP_APPLICATION" "ERLANG_COOKIE"
 
   iex \\
-    --name "$USER-local-$(date +%s)@$ERLANG_HOST" \\
+    --name "local-$(date +%s)@$ERLANG_HOST" \\
     --cookie "$ERLANG_COOKIE" \\
     --erl "+K true +A 32" \\
     --erl "-kernel inet_dist_listen_min 9100" \\
@@ -526,6 +527,14 @@ defmodule Mix.Tasks.Boilex.Init do
     --erl "-kernel inet_dist_listen_max 9199" \\
     --erl "-kernel shell_history enabled" \\
     -S mix
+  """
+
+  embed_template :docker_iex, """
+  #!/bin/bash
+
+  set -e
+
+  docker exec -it $(docker ps | grep "<%= @otp_application %>_main" | awk '{print $1;}') /app/scripts/remote-iex.sh
   """
 
   #
