@@ -311,10 +311,17 @@ defmodule Mix.Tasks.Boilex.Init do
 
   COPY . .
 
-  RUN rm -rf ./_build/ && \\
+  RUN cd / && \\
       mix do local.hex --force, local.rebar --force && \\
-      MIX_ENV=staging mix compile.protocols && \\
-      MIX_ENV=prod  mix compile.protocols
+      mix archive.install github heathmont/ex_env tag v0.2.0 --force && \\
+      cd /app && \\
+      rm -rf ./_build/ && \\
+      # echo "Compressing static files..." && \\
+      # mix phx.digest && \\
+      MIX_ENV=prelive mix compile.protocols && \\
+      MIX_ENV=prod    mix compile.protocols && \\
+      MIX_ENV=qa      mix compile.protocols && \\
+      MIX_ENV=staging mix compile.protocols
 
   CMD echo "Checking system variables..." && \\
       scripts/show-vars.sh \\
@@ -333,6 +340,12 @@ defmodule Mix.Tasks.Boilex.Init do
         "ERLANG_MAX_PORT" \\
         "ERLANG_MAX_PROCESSES" \\
         "ERLANG_COOKIE" && \\
+      # echo "Running ecto create..." && \\
+      # mix ecto.create && \\
+      # echo "Running ecto migrate..." && \\
+      # mix ecto.migrate && \\
+      # echo "Running ecto seeds..." && \\
+      # mix run priv/repo/seeds.exs && \\
       echo "Running app..." && \\
       elixir \\
         --name "$ERLANG_OTP_APPLICATION@$ERLANG_HOST" \\
