@@ -787,6 +787,9 @@ defmodule Mix.Tasks.Boilex.Init do
       working_directory: /app
       steps:
         - checkout
+        - run:
+            name:       Check variables
+            command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" "CONFLUENCE_SECRET"
         - <<: *setup_ssh_key
         - <<: *setup_ssh_config
         - <<: *fetch_submodules
