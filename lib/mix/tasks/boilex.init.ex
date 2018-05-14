@@ -466,7 +466,6 @@ defmodule Mix.Tasks.Boilex.Init do
     --erl "+K true +A 32" \\
     --erl "-kernel inet_dist_listen_min 9100" \\
     --erl "-kernel inet_dist_listen_max 9199" \\
-    -pa "_build/dev/consolidated/" \\
     -e ":timer.sleep(5000); Node.connect(:\\"$ERLANG_OTP_APPLICATION@$ERLANG_HOST\\")" \\
     -S mix
 
