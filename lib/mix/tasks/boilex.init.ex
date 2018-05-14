@@ -559,89 +559,217 @@ defmodule Mix.Tasks.Boilex.Init do
     docker:
       - image: heathmont/elixir-builder:1.6.5<%= if @include_postgres, do: "\n"<>postgres_circleci_image() %>
 
+  check_vars: &check_vars
+    run:
+      name:       Check variables
+      command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" "DOCKER_EMAIL" "DOCKER_ORG" "DOCKER_PASS" "DOCKER_USER"
+
+  setup_ssh_key: &setup_ssh_key
+    run:
+      name:       Setup robot SSH key
+      command:    echo "$ROBOT_SSH_KEY" | base64 --decode > $HOME/.ssh/id_rsa.robot && chmod 600 $HOME/.ssh/id_rsa.robot && ssh-add $HOME/.ssh/id_rsa.robot
+
+  setup_ssh_config: &setup_ssh_config
+    run:
+      name:        Setup SSH config
+      command:     echo -e "Host *\n IdentityFile $HOME/.ssh/id_rsa.robot\n IdentitiesOnly yes" > $HOME/.ssh/config
+
+  fetch_submodules: &fetch_submodules
+    run:
+      name:       Fetch submodules
+      command:    git submodule update --init --recursive
+
+  fetch_dependencies: &fetch_dependencies
+    run:
+      name:       Fetch dependencies
+      command:    mix deps.get
+
+  compile_dependencies: &compile_dependencies
+    run:
+      name:       Compile dependencies
+      command:    mix deps.compile
+
+  compile_protocols: &compile_protocols
+    run:
+      name:       Compile protocols
+      command:    mix compile.protocols --warnings-as-errors
+
   version: 2
   jobs:
     test:
       <<: *defaults
+      working_directory: /app
+      environment:
+        MIX_ENV: test
       steps:
         - checkout
         - run:
             name:       Check variables
             command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" "COVERALLS_REPO_TOKEN"
-        - run:
-            name:       Setup robot SSH key
-            command:    echo "$ROBOT_SSH_KEY" | base64 --decode > $HOME/.ssh/id_rsa.robot && chmod 600 $HOME/.ssh/id_rsa.robot && ssh-add $HOME/.ssh/id_rsa.robot
-        - run:
-           name:        Setup SSH config
-           command:     echo -e "Host *\\n IdentityFile $HOME/.ssh/id_rsa.robot\\n IdentitiesOnly yes" > $HOME/.ssh/config
-        - run:
-            name:       Fetch submodules
-            command:    git submodule update --init --recursive
+        - <<: *setup_ssh_key
+        - <<: *setup_ssh_config
+        - <<: *fetch_submodules
         - restore_cache:
             keys:
-              - v1-deps-cache-{{ checksum "mix.lock" }}
-              - v1-deps-cache
-        - run:
-            name:       Fetch dependencies
-            command:    mix deps.get
-        - run:
-            name:       Compile dependencies
-            command:    mix deps.compile
-        - run:
-            name:       Compile protocols
-            command:    mix compile.protocols --warnings-as-errors
-        - save_cache:
-            key: v1-deps-cache-{{ checksum "mix.lock" }}
-            paths:
-              - _build
-              - deps
-              - ~/.mix
+              - test-{{ checksum "mix.lock" }}-{{ .Revision }}
+              - test-{{ checksum "mix.lock" }}
+              - test-
+        - <<: *fetch_dependencies
+        - <<: *compile_dependencies
+        - <<: *compile_protocols
+        # - run:
+        #     name:       Create test DB
+        #     command:    mix ecto.create
+        # - run:
+        #     name:       Migrate test DB
+        #     command:    mix ecto.migrate
         - run:
             name:       Run tests
             command:    mix coveralls.circle
         - run:
             name:       Run style checks
             command:    mix credo --strict
-        - restore_cache:
-            keys:
-              - v1-dialyzer-plt-cache-{{ checksum "mix.lock" }}
-              - v1-plt-cache
         - run:
             name:       Run Dialyzer type checks
             command:    mix dialyzer --halt-exit-status
             no_output_timeout: 15m
         - save_cache:
-            key: v1-dialyzer-plt-cache-{{ checksum "mix.lock" }}
+            key: test-{{ checksum "mix.lock" }}-{{ .Revision }}
             paths:
               - _build
+              - deps
+              - ~/.mix
+
+    build_qa:
+      <<: *defaults
+      environment:
+        MIX_ENV: qa
+      steps:
+        - checkout
+        - setup_remote_docker
+        - <<: *check_vars
+        - <<: *setup_ssh_key
+        - <<: *setup_ssh_config
+        - <<: *fetch_submodules
+        - restore_cache:
+            keys:
+              - qa-{{ checksum "mix.lock" }}-{{ .Revision }}
+              - qa-{{ checksum "mix.lock" }}
+              - qa-
+        - <<: *fetch_dependencies
+        - <<: *compile_dependencies
+        - <<: *compile_protocols
+        - save_cache:
+            key: qa-{{ checksum "mix.lock" }}-{{ .Revision }}
+            paths:
+              - _build
+              - deps
               - ~/.mix
         - persist_to_workspace:
             root: ./
             paths:
-              - .
-    build:
+              - _build/qa
+              - deps
+
+    build_prelive:
       <<: *defaults
+      environment:
+        MIX_ENV: prelive
       steps:
         - checkout
         - setup_remote_docker
-        - run:
-            name:       Check variables
-            command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" "DOCKER_EMAIL" "DOCKER_ORG" "DOCKER_PASS" "DOCKER_USER"
-        - run:
-            name:       Setup robot SSH key
-            command:    echo "$ROBOT_SSH_KEY" | base64 --decode > $HOME/.ssh/id_rsa.robot && chmod 600 $HOME/.ssh/id_rsa.robot && ssh-add $HOME/.ssh/id_rsa.robot
-        - run:
-           name:        Setup SSH config
-           command:     echo -e "Host *\\n IdentityFile $HOME/.ssh/id_rsa.robot\\n IdentitiesOnly yes" > $HOME/.ssh/config
-        - run:
-            name:       Fetch submodules
-            command:    git submodule update --init --recursive
-        - run:
-            name:       Fetching dependencies
-            command:    mix deps.get && MIX_ENV=staging mix deps.get && MIX_ENV=prod mix deps.get
-        - run:
-            name:       Compile protocols
-            command:    mix compile.protocols --warnings-as-errors
+        - <<: *check_vars
+        - <<: *setup_ssh_key
+        - <<: *setup_ssh_config
+        - <<: *fetch_submodules
+        - restore_cache:
+            keys:
+              - prelive-{{ checksum "mix.lock" }}-{{ .Revision }}
+              - prelive-{{ checksum "mix.lock" }}
+              - prelive-
+        - <<: *fetch_dependencies
+        - <<: *compile_dependencies
+        - <<: *compile_protocols
+        - save_cache:
+            key: prelive-{{ checksum "mix.lock" }}-{{ .Revision }}
+            paths:
+              - _build
+              - deps
+              - ~/.mix
+        - persist_to_workspace:
+            root: ./
+            paths:
+              - _build/prelive
+
+    build_staging:
+      <<: *defaults
+      environment:
+        MIX_ENV: staging
+      steps:
+        - checkout
+        - setup_remote_docker
+        - <<: *check_vars
+        - <<: *setup_ssh_key
+        - <<: *setup_ssh_config
+        - <<: *fetch_submodules
+        - restore_cache:
+            keys:
+              - staging-{{ checksum "mix.lock" }}-{{ .Revision }}
+              - staging-{{ checksum "mix.lock" }}
+              - staging-
+        - <<: *fetch_dependencies
+        - <<: *compile_dependencies
+        - <<: *compile_protocols
+        - save_cache:
+            key: staging-{{ checksum "mix.lock" }}-{{ .Revision }}
+            paths:
+              - _build
+              - deps
+              - ~/.mix
+        - persist_to_workspace:
+            root: ./
+            paths:
+              - _build/staging
+
+    build_prod:
+      <<: *defaults
+      environment:
+        MIX_ENV: prod
+      steps:
+        - checkout
+        - setup_remote_docker
+        - <<: *check_vars
+        - <<: *setup_ssh_key
+        - <<: *setup_ssh_config
+        - <<: *fetch_submodules
+        - restore_cache:
+            keys:
+              - prod-{{ checksum "mix.lock" }}-{{ .Revision }}
+              - prod-{{ checksum "mix.lock" }}
+              - prod-
+        - <<: *fetch_dependencies
+        - <<: *compile_dependencies
+        - <<: *compile_protocols
+        - save_cache:
+            key: prod-{{ checksum "mix.lock" }}-{{ .Revision }}
+            paths:
+              - _build
+              - deps
+              - ~/.mix
+        - persist_to_workspace:
+            root: ./
+            paths:
+              - _build/prod
+
+    docker_build:
+      <<: *defaults
+      environment:
+        MIX_ENV: prod
+      steps:
+        - checkout
+        - setup_remote_docker
+        - attach_workspace:
+            at: ./
         - run:
             name:       Login to docker
             command:    docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
@@ -651,28 +779,31 @@ defmodule Mix.Tasks.Boilex.Init do
         - run:
             name:       Push image to docker hub
             command:    export $(cat "./scripts/.env" | xargs) && mix boilex.ci.docker.push "$CIRCLE_TAG"
+
     doc:
       <<: *defaults
+      environment:
+        MIX_ENV: dev
+      working_directory: /app
       steps:
         - checkout
-        - run:
-            name:       Check variables
-            command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" "CONFLUENCE_SECRET"
-        - run:
-            name:       Setup robot SSH key
-            command:    echo "$ROBOT_SSH_KEY" | base64 --decode > $HOME/.ssh/id_rsa.robot && chmod 600 $HOME/.ssh/id_rsa.robot && ssh-add $HOME/.ssh/id_rsa.robot
-        - run:
-           name:        Setup SSH config
-           command:     echo -e "Host *\\n IdentityFile $HOME/.ssh/id_rsa.robot\\n IdentitiesOnly yes" > $HOME/.ssh/config
-        - run:
-            name:       Fetch submodules
-            command:    git submodule update --init --recursive
-        - run:
-            name:       Fetching dependencies
-            command:    mix deps.get
-        - run:
-            name:       Compile protocols
-            command:    mix compile.protocols --warnings-as-errors
+        - <<: *setup_ssh_key
+        - <<: *setup_ssh_config
+        - <<: *fetch_submodules
+        - restore_cache:
+            keys:
+              - doc-{{ checksum "mix.lock" }}-{{ .Revision }}
+              - doc-{{ checksum "mix.lock" }}
+              - doc-
+        - <<: *fetch_dependencies
+        - <<: *compile_dependencies
+        - <<: *compile_protocols
+        - save_cache:
+            key: doc-{{ checksum "mix.lock" }}-{{ .Revision }}
+            paths:
+              - _build
+              - deps
+              - ~/.mix
         - run:
             name:       Compile documentation
             command:    mix docs<%= if @include_postgres, do: "\n"<>postgres_circleci_erd() %>
@@ -687,17 +818,43 @@ defmodule Mix.Tasks.Boilex.Init do
         - test:
             filters:
               branches:
-                only: /^([A-Z]{2,}-[0-9]+|hotfix-.+)$/
+                only: /^([A-Z]{2,}-[0-9]+|hotfix-.+|feature-.*)$/
     test-build:
       jobs:
         - test:
             filters:
               branches:
-                only: /^(build-*)$/
-        - build:
+                only: /^(build-.+)$/
+        - build_qa:
             filters:
               branches:
-                only: /^(build-*)$/
+                only: /^(build-.+)$/
+
+        - build_prelive:
+            filters:
+              branches:
+                only: /^(build-.+)$/
+
+        - build_staging:
+            filters:
+              branches:
+                only: /^(build-.+)$/
+
+        - build_prod:
+            filters:
+              branches:
+                only: /^(build-.+)$/
+
+        - docker_build:
+            filters:
+              branches:
+                only: /^(build-.+)$/
+            requires:
+              - test
+              - build_qa
+              - build_prelive
+              - build_staging
+              - build_prod
     test-build-doc:
       jobs:
         - test:
@@ -706,12 +863,47 @@ defmodule Mix.Tasks.Boilex.Init do
                 only: /.*/
               branches:
                 only: /^master$/
-        - build:
+
+        - build_qa:
             filters:
               tags:
                 only: /.*/
               branches:
                 only: /^master$/
+
+        - build_prelive:
+            filters:
+              tags:
+                only: /.*/
+              branches:
+                only: /^master$/
+
+        - build_staging:
+            filters:
+              tags:
+                only: /.*/
+              branches:
+                only: /^master$/
+
+        - build_prod:
+            filters:
+              tags:
+                only: /.*/
+              branches:
+                only: /^master$/
+
+        - docker_build:
+            filters:
+              tags:
+                only: /.*/
+              branches:
+                only: /^master$/
+            requires:
+              - test
+              - build_qa
+              - build_prelive
+              - build_staging
+              - build_prod
         - doc:
             filters:
               tags:
