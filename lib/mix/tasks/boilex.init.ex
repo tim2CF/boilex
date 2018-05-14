@@ -572,7 +572,7 @@ defmodule Mix.Tasks.Boilex.Init do
   setup_ssh_config: &setup_ssh_config
     run:
       name:        Setup SSH config
-      command:     echo -e "Host *\n IdentityFile $HOME/.ssh/id_rsa.robot\n IdentitiesOnly yes" > $HOME/.ssh/config
+      command:     echo -e "Host *\\n IdentityFile $HOME/.ssh/id_rsa.robot\\n IdentitiesOnly yes" > $HOME/.ssh/config
 
   fetch_submodules: &fetch_submodules
     run:
