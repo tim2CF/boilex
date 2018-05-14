@@ -37,7 +37,7 @@ defmodule Mix.Tasks.Boilex.Init do
     create_file       ".editorconfig",          editorconfig_text()
     create_file       ".formatter.exs",         formatter_text()
     # docker stuff
-    create_file       "Dockerfile",             dockerfile_text()
+    create_file       "Dockerfile",             dockerfile_template(assigns)
     create_file       "docker-compose.yml",     docker_compose_template(assigns)
     # local dev scripts
     create_directory  "scripts"
@@ -304,8 +304,8 @@ defmodule Mix.Tasks.Boilex.Init do
   # docker stuff
   #
 
-  embed_text :dockerfile, """
-  FROM elixir:1.6
+  embed_template :dockerfile, """
+  FROM elixir:1.6.5
 
   WORKDIR /app
 
@@ -353,7 +353,7 @@ defmodule Mix.Tasks.Boilex.Init do
         --erl "+K true +A 32 +P $ERLANG_MAX_PROCESSES" \\
         --erl "-kernel inet_dist_listen_min $ERLANG_MIN_PORT" \\
         --erl "-kernel inet_dist_listen_max $ERLANG_MAX_PORT" \\
-        -pa "_build/$MIX_ENV/consolidated/" \\
+        -pa "_build/$MIX_ENV/lib/<%= @otp_application %>/consolidated/" \\
         -S mix run \\
         --no-halt
   """
@@ -557,7 +557,7 @@ defmodule Mix.Tasks.Boilex.Init do
   embed_template :circleci_config, """
   defaults: &defaults
     docker:
-      - image: tim2cf/elixir-builder:1.6<%= if @include_postgres, do: "\n"<>postgres_circleci_image() %>
+      - image: heathmont/elixir-builder:1.6.5<%= if @include_postgres, do: "\n"<>postgres_circleci_image() %>
 
   version: 2
   jobs:
