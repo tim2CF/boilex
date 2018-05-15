@@ -24,7 +24,7 @@ Add the following parameters to `deps` function in `mix.exs` file
 {:dialyxir, "~> 0.5",    only: [:dev, :test], runtime: false},
 {:ex_doc, "~> 0.18",     only: [:dev, :test], runtime: false},
 {:credo, "~> 0.8",       only: [:dev, :test], runtime: false},
-{:boilex, "~> 0.1.7",    only: [:dev, :test], runtime: false},
+{:boilex, "~> 0.2",      only: [:dev, :test], runtime: false},
 ```
 
 ## Usage
