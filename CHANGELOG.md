@@ -1,5 +1,8 @@
 # Change Log
 
+## [v0.2.0](https://github.com/tim2CF/boilex/tree/v0.2.0) (2018-05-15)
+[Full Changelog](https://github.com/tim2CF/boilex/compare/v0.1.7...v0.2.0)
+
 ## [v0.1.7](https://github.com/tim2CF/boilex/tree/v0.1.7) (2018-04-19)
 [Full Changelog](https://github.com/tim2CF/boilex/compare/v0.1.6...v0.1.7)
 
