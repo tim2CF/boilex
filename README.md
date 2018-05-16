@@ -53,6 +53,14 @@ Script bumps version, creates new release, updates changelog and pushes new tag 
 mix boilex.release patch
 ```
 
+### boilex.hex.publish
+
+Task is wrapper around standard `mix hex.publish` but it prevents accidental pushing of private organization packages to open-source. Can accept optional `--confirm-public` flag to enforce open-source push.
+
+```
+mix boilex.hex.publish [--confirm-public]
+```
+
 ### boilex.ci
 
 Some mix tasks are made to use by CI. But of course tasks can be executed locally if needed. List of tasks:
