@@ -972,7 +972,8 @@ defmodule Mix.Tasks.Boilex.Init do
       dialyzer: [
         ignore_warnings: ".dialyzer_ignore",
         plt_add_apps: [
-          :mix
+          :mix,
+          :ex_unit,
         ]
       ],
       # ex_doc
