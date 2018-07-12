@@ -305,7 +305,7 @@ defmodule Mix.Tasks.Boilex.Init do
   #
 
   embed_template :dockerfile, """
-  FROM elixir:1.6.5
+  FROM elixir:<%= elixir_version() %>
 
   WORKDIR /app
 
@@ -313,15 +313,15 @@ defmodule Mix.Tasks.Boilex.Init do
 
   RUN cd / && \\
       mix do local.hex --force, local.rebar --force && \\
-      mix archive.install github heathmont/ex_env tag v0.2.0 --force && \\
-      cd /app && \\
-      rm -rf ./_build/ && \\
+      mix archive.install github heathmont/ex_env tag v0.2.2 --force && \\
+      cd /app # && \\
+      # rm -rf ./_build/ && \\
       # echo "Compressing static files..." && \\
       # mix phx.digest && \\
-      MIX_ENV=prelive mix compile.protocols && \\
-      MIX_ENV=prod    mix compile.protocols && \\
-      MIX_ENV=qa      mix compile.protocols && \\
-      MIX_ENV=staging mix compile.protocols
+      # MIX_ENV=prelive mix compile.protocols && \\
+      # MIX_ENV=prod    mix compile.protocols && \\
+      # MIX_ENV=qa      mix compile.protocols && \\
+      # MIX_ENV=staging mix compile.protocols
 
   CMD echo "Checking system variables..." && \\
       scripts/show-vars.sh \\
@@ -555,8 +555,9 @@ defmodule Mix.Tasks.Boilex.Init do
 
   embed_template :circleci_config, """
   defaults: &defaults
+    working_directory: /app
     docker:
-      - image: heathmont/elixir-builder:1.6.5<%= if @include_postgres, do: "\n"<>postgres_circleci_image() %>
+      - image: heathmont/elixir-builder:<%= elixir_version() %><%= if @include_postgres, do: "\n"<>postgres_circleci_image() %>
 
   check_vars: &check_vars
     run:
@@ -577,6 +578,11 @@ defmodule Mix.Tasks.Boilex.Init do
     run:
       name:       Fetch submodules
       command:    git submodule update --init --recursive
+
+  hex_auth: &hex_auth
+    run:
+      name:       Hex auth
+      command:    mix hex.organization auth $HEX_ORGANIZATION --key $HEX_API_KEY
 
   fetch_dependencies: &fetch_dependencies
     run:
@@ -610,9 +616,10 @@ defmodule Mix.Tasks.Boilex.Init do
         - <<: *fetch_submodules
         - restore_cache:
             keys:
-              - test-{{ checksum "mix.lock" }}-{{ .Revision }}
-              - test-{{ checksum "mix.lock" }}
-              - test-
+              - v1-test-{{ checksum "mix.lock" }}-{{ .Revision }}
+              - v1-test-{{ checksum "mix.lock" }}-
+              - v1-test-
+        # - <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
@@ -633,7 +640,7 @@ defmodule Mix.Tasks.Boilex.Init do
             command:    mix dialyzer --halt-exit-status
             no_output_timeout: 15m
         - save_cache:
-            key: test-{{ checksum "mix.lock" }}-{{ .Revision }}
+            key: v1-test-{{ checksum "mix.lock" }}-{{ .Revision }}
             paths:
               - _build
               - deps
@@ -652,14 +659,15 @@ defmodule Mix.Tasks.Boilex.Init do
         - <<: *fetch_submodules
         - restore_cache:
             keys:
-              - qa-{{ checksum "mix.lock" }}-{{ .Revision }}
-              - qa-{{ checksum "mix.lock" }}
-              - qa-
+              - v1-qa-{{ checksum "mix.lock" }}-{{ .Revision }}
+              - v1-qa-{{ checksum "mix.lock" }}-
+              - v1-qa-
+        # - <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
         - save_cache:
-            key: qa-{{ checksum "mix.lock" }}-{{ .Revision }}
+            key: v1-qa-{{ checksum "mix.lock" }}-{{ .Revision }}
             paths:
               - _build
               - deps
@@ -683,14 +691,15 @@ defmodule Mix.Tasks.Boilex.Init do
         - <<: *fetch_submodules
         - restore_cache:
             keys:
-              - prelive-{{ checksum "mix.lock" }}-{{ .Revision }}
-              - prelive-{{ checksum "mix.lock" }}
-              - prelive-
+              - v1-prelive-{{ checksum "mix.lock" }}-{{ .Revision }}
+              - v1-prelive-{{ checksum "mix.lock" }}-
+              - v1-prelive-
+        # - <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
         - save_cache:
-            key: prelive-{{ checksum "mix.lock" }}-{{ .Revision }}
+            key: v1-prelive-{{ checksum "mix.lock" }}-{{ .Revision }}
             paths:
               - _build
               - deps
@@ -713,14 +722,15 @@ defmodule Mix.Tasks.Boilex.Init do
         - <<: *fetch_submodules
         - restore_cache:
             keys:
-              - staging-{{ checksum "mix.lock" }}-{{ .Revision }}
-              - staging-{{ checksum "mix.lock" }}
-              - staging-
+              - v1-staging-{{ checksum "mix.lock" }}-{{ .Revision }}
+              - v1-staging-{{ checksum "mix.lock" }}-
+              - v1-staging-
+        # - <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
         - save_cache:
-            key: staging-{{ checksum "mix.lock" }}-{{ .Revision }}
+            key: v1-staging-{{ checksum "mix.lock" }}-{{ .Revision }}
             paths:
               - _build
               - deps
@@ -743,14 +753,15 @@ defmodule Mix.Tasks.Boilex.Init do
         - <<: *fetch_submodules
         - restore_cache:
             keys:
-              - prod-{{ checksum "mix.lock" }}-{{ .Revision }}
-              - prod-{{ checksum "mix.lock" }}
-              - prod-
+              - v1-prod-{{ checksum "mix.lock" }}-{{ .Revision }}
+              - v1-prod-{{ checksum "mix.lock" }}-
+              - v1-prod-
+        # - <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
         - save_cache:
-            key: prod-{{ checksum "mix.lock" }}-{{ .Revision }}
+            key: v1-prod-{{ checksum "mix.lock" }}-{{ .Revision }}
             paths:
               - _build
               - deps
@@ -794,14 +805,15 @@ defmodule Mix.Tasks.Boilex.Init do
         - <<: *fetch_submodules
         - restore_cache:
             keys:
-              - doc-{{ checksum "mix.lock" }}-{{ .Revision }}
-              - doc-{{ checksum "mix.lock" }}
-              - doc-
+              - v1-doc-{{ checksum "mix.lock" }}-{{ .Revision }}
+              - v1-doc-{{ checksum "mix.lock" }}-
+              - v1-doc-
+        # - <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
         - save_cache:
-            key: doc-{{ checksum "mix.lock" }}-{{ .Revision }}
+            key: v1-doc-{{ checksum "mix.lock" }}-{{ .Revision }}
             paths:
               - _build
               - deps
@@ -818,36 +830,43 @@ defmodule Mix.Tasks.Boilex.Init do
     test:
       jobs:
         - test:
+            context: global
             filters:
               branches:
                 only: /^([A-Z]{2,}-[0-9]+|hotfix-.+|feature-.*)$/
     test-build:
       jobs:
         - test:
+            context: global
             filters:
               branches:
                 only: /^(build-.+)$/
         - build_qa:
+            context: global
             filters:
               branches:
                 only: /^(build-.+)$/
 
         - build_prelive:
+            context: global
             filters:
               branches:
                 only: /^(build-.+)$/
 
         - build_staging:
+            context: global
             filters:
               branches:
                 only: /^(build-.+)$/
 
         - build_prod:
+            context: global
             filters:
               branches:
                 only: /^(build-.+)$/
 
         - docker_build:
+            context: global
             filters:
               branches:
                 only: /^(build-.+)$/
@@ -860,6 +879,7 @@ defmodule Mix.Tasks.Boilex.Init do
     test-build-doc:
       jobs:
         - test:
+            context: global
             filters:
               tags:
                 only: /.*/
@@ -867,6 +887,7 @@ defmodule Mix.Tasks.Boilex.Init do
                 only: /^master$/
 
         - build_qa:
+            context: global
             filters:
               tags:
                 only: /.*/
@@ -874,6 +895,7 @@ defmodule Mix.Tasks.Boilex.Init do
                 only: /^master$/
 
         - build_prelive:
+            context: global
             filters:
               tags:
                 only: /.*/
@@ -881,6 +903,7 @@ defmodule Mix.Tasks.Boilex.Init do
                 only: /^master$/
 
         - build_staging:
+            context: global
             filters:
               tags:
                 only: /.*/
@@ -888,6 +911,7 @@ defmodule Mix.Tasks.Boilex.Init do
                 only: /^master$/
 
         - build_prod:
+            context: global
             filters:
               tags:
                 only: /.*/
@@ -895,6 +919,7 @@ defmodule Mix.Tasks.Boilex.Init do
                 only: /^master$/
 
         - docker_build:
+            context: global
             filters:
               tags:
                 only: /.*/
@@ -907,6 +932,7 @@ defmodule Mix.Tasks.Boilex.Init do
               - build_staging
               - build_prod
         - doc:
+            context: global
             filters:
               tags:
                 only: /.*/
@@ -995,15 +1021,6 @@ defmodule Mix.Tasks.Boilex.Init do
 
 
     #{IO.ANSI.cyan}
-    ADD THE FOLLOWING LINES TO `.gitignore` FILE
-    #{IO.ANSI.green}
-
-
-      /doc
-      /cover
-
-
-    #{IO.ANSI.cyan}
     If your project is OTP application (not just library),
     probably you would like to add `stop` function to your
     `application.ex` file to prevent situations when
@@ -1054,6 +1071,17 @@ defmodule Mix.Tasks.Boilex.Init do
               command:    export PROJECT_DIRECTORY="$(pwd)" && pushd /schemacrawler-14.19.01-distribution/_schemacrawler/ && ./schemacrawler.sh -server=postgresql -host=127.0.0.1 -user=postgres -password=postgres -database=platform88 -infolevel=standard -routines= -command=schema -outputformat=png -o "$PROJECT_DIRECTORY/doc/database-ERD.png" && popd
     """
     |> String.trim("\n")
+  end
+
+  defp elixir_version do
+    [{:elixir, _, version}] =
+      :application.which_applications
+      |> Enum.filter(fn({app, _, _}) ->
+        app == :elixir
+      end)
+
+    version
+    |> :erlang.list_to_binary
   end
 
 end
