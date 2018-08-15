@@ -979,6 +979,16 @@ defmodule Mix.Tasks.Boilex.Init do
 
 
     #{IO.ANSI.cyan}
+    ADD THE FOLLOWING LINES TO `.gitignore` FILE
+    #{IO.ANSI.green}
+
+
+      /doc
+      /cover
+      /.elixir_ls
+
+
+    #{IO.ANSI.cyan}
     ADD THE FOLLOWING PARAMETERS TO `project` FUNCTION IN `mix.exs` FILE
     #{IO.ANSI.green}
 
