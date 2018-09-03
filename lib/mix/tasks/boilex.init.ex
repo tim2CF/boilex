@@ -20,14 +20,16 @@ defmodule Mix.Tasks.Boilex.Init do
     otp_application  = fetch_otp_application_name()
     include_postgres = Mix.shell.yes?("Include postgres stuff to CircleCI config?")
     include_hex_auth = Mix.shell.yes?("Are you using private hex.pm?")
+    include_coveralls_push = Mix.shell.yes?("Push test results to https://coveralls.io/ web service?")
     hex_organization = fetch_hex_organization_name(include_hex_auth)
     erlang_cookie    = :crypto.strong_rand_bytes(32) |> Base.encode64
     assigns          = [
-                        otp_application:  otp_application,
-                        erlang_cookie:    erlang_cookie,
-                        include_postgres: include_postgres,
-                        include_hex_auth: include_hex_auth,
-                        hex_organization: hex_organization,
+                        otp_application:        otp_application,
+                        erlang_cookie:          erlang_cookie,
+                        include_postgres:       include_postgres,
+                        include_hex_auth:       include_hex_auth,
+                        hex_organization:       hex_organization,
+                        include_coveralls_push: include_coveralls_push,
                        ]
 
     # priv dir for usage in Elixir code
@@ -614,7 +616,7 @@ defmodule Mix.Tasks.Boilex.Init do
         - checkout
         - run:
             name:       Check variables
-            command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" "COVERALLS_REPO_TOKEN"
+            command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" <%= if @include_coveralls_push, do: "\"COVERALLS_REPO_TOKEN\"" %>
         - <<: *setup_ssh_key
         - <<: *setup_ssh_config
         - <<: *fetch_submodules
@@ -635,7 +637,7 @@ defmodule Mix.Tasks.Boilex.Init do
         #     command:    mix ecto.migrate
         - run:
             name:       Run tests
-            command:    mix coveralls.circle
+            command:    mix coveralls<%= if @include_coveralls_push, do: ".circle" %>
         - run:
             name:       Run style checks
             command:    mix credo --strict
