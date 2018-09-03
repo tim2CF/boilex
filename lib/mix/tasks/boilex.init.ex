@@ -19,11 +19,15 @@ defmodule Mix.Tasks.Boilex.Init do
 
     otp_application  = fetch_otp_application_name()
     include_postgres = Mix.shell.yes?("Include postgres stuff to CircleCI config?")
+    include_hex_auth = Mix.shell.yes?("Are you using private hex.pm?")
+    hex_organization = fetch_hex_organization_name(include_hex_auth)
     erlang_cookie    = :crypto.strong_rand_bytes(32) |> Base.encode64
     assigns          = [
                         otp_application:  otp_application,
                         erlang_cookie:    erlang_cookie,
                         include_postgres: include_postgres,
+                        include_hex_auth: include_hex_auth,
+                        hex_organization: hex_organization,
                        ]
 
     # priv dir for usage in Elixir code
@@ -582,7 +586,7 @@ defmodule Mix.Tasks.Boilex.Init do
   hex_auth: &hex_auth
     run:
       name:       Hex auth
-      command:    mix hex.organization auth $HEX_ORGANIZATION --key $HEX_API_KEY
+      command:    mix hex.organization auth <%= @hex_organization %> --key $HEX_API_KEY
 
   fetch_dependencies: &fetch_dependencies
     run:
@@ -619,7 +623,7 @@ defmodule Mix.Tasks.Boilex.Init do
               - v1-test-{{ checksum "mix.lock" }}-{{ .Revision }}
               - v1-test-{{ checksum "mix.lock" }}-
               - v1-test-
-        # - <<: *hex_auth
+        <%= if not(@include_hex_auth), do: "#" %> - <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
@@ -662,7 +666,7 @@ defmodule Mix.Tasks.Boilex.Init do
               - v1-qa-{{ checksum "mix.lock" }}-{{ .Revision }}
               - v1-qa-{{ checksum "mix.lock" }}-
               - v1-qa-
-        # - <<: *hex_auth
+        <%= if not(@include_hex_auth), do: "#" %> - <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
@@ -694,7 +698,7 @@ defmodule Mix.Tasks.Boilex.Init do
               - v1-prelive-{{ checksum "mix.lock" }}-{{ .Revision }}
               - v1-prelive-{{ checksum "mix.lock" }}-
               - v1-prelive-
-        # - <<: *hex_auth
+        <%= if not(@include_hex_auth), do: "#" %> - <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
@@ -725,7 +729,7 @@ defmodule Mix.Tasks.Boilex.Init do
               - v1-staging-{{ checksum "mix.lock" }}-{{ .Revision }}
               - v1-staging-{{ checksum "mix.lock" }}-
               - v1-staging-
-        # - <<: *hex_auth
+        <%= if not(@include_hex_auth), do: "#" %> - <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
@@ -756,7 +760,7 @@ defmodule Mix.Tasks.Boilex.Init do
               - v1-prod-{{ checksum "mix.lock" }}-{{ .Revision }}
               - v1-prod-{{ checksum "mix.lock" }}-
               - v1-prod-
-        # - <<: *hex_auth
+        <%= if not(@include_hex_auth), do: "#" %> - <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
@@ -808,7 +812,7 @@ defmodule Mix.Tasks.Boilex.Init do
               - v1-doc-{{ checksum "mix.lock" }}-{{ .Revision }}
               - v1-doc-{{ checksum "mix.lock" }}-
               - v1-doc-
-        # - <<: *hex_auth
+        <%= if not(@include_hex_auth), do: "#" %> - <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
@@ -945,21 +949,24 @@ defmodule Mix.Tasks.Boilex.Init do
   #
 
   defp fetch_otp_application_name do
-    Mix.shell.prompt("Please type OTP application name>")
-    |> String.trim
-    |> Macro.underscore
-    |> String.downcase
+
+    config =
+      Mix.Project.config
+
+    config
+    |> Keyword.keyword?
     |> case do
-      "" ->
-        Mix.shell.error("Empty OTP application name!")
-        fetch_otp_application_name()
-      name ->
-        case Regex.match?(~r/^([a-z]+[a-z0-9]*)(_[a-z]+[a-z0-9]*)*([a-z]+[a-z0-9]*)$/, name)  do
-          true -> name
-          false ->
-            Mix.shell.error("Invalid OTP application name!")
-            fetch_otp_application_name()
+      true ->
+        config
+        |> Keyword.get(:app)
+        |> case do
+          name when is_atom(name) and (name != nil) ->
+            name
+          name ->
+            raise("wrong OTP application name #{inspect name}")
         end
+      false ->
+        raise("wrong Mix.Project.config value #{inspect config}")
     end
   end
 
@@ -1092,6 +1099,22 @@ defmodule Mix.Tasks.Boilex.Init do
 
     version
     |> :erlang.list_to_binary
+  end
+
+  defp fetch_hex_organization_name(true) do
+    "Please type HEX organization name>"
+    |> Mix.shell.prompt
+    |> String.trim
+    |> case do
+      "" ->
+        IO.puts("wrong empty oranization name")
+        fetch_hex_organization_name(true)
+      name when is_binary(name) ->
+        name
+    end
+  end
+  defp fetch_hex_organization_name(false) do
+    "$HEX_ORGANIZATION"
   end
 
 end
