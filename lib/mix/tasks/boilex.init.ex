@@ -623,7 +623,7 @@ defmodule Mix.Tasks.Boilex.Init do
               - v1-test-{{ checksum "mix.lock" }}-{{ .Revision }}
               - v1-test-{{ checksum "mix.lock" }}-
               - v1-test-
-        <%= if not(@include_hex_auth), do: "#" %> - <<: *hex_auth
+        <%= if not(@include_hex_auth), do: "# " %>- <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
@@ -666,7 +666,7 @@ defmodule Mix.Tasks.Boilex.Init do
               - v1-qa-{{ checksum "mix.lock" }}-{{ .Revision }}
               - v1-qa-{{ checksum "mix.lock" }}-
               - v1-qa-
-        <%= if not(@include_hex_auth), do: "#" %> - <<: *hex_auth
+        <%= if not(@include_hex_auth), do: "# " %>- <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
@@ -698,7 +698,7 @@ defmodule Mix.Tasks.Boilex.Init do
               - v1-prelive-{{ checksum "mix.lock" }}-{{ .Revision }}
               - v1-prelive-{{ checksum "mix.lock" }}-
               - v1-prelive-
-        <%= if not(@include_hex_auth), do: "#" %> - <<: *hex_auth
+        <%= if not(@include_hex_auth), do: "# " %>- <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
@@ -729,7 +729,7 @@ defmodule Mix.Tasks.Boilex.Init do
               - v1-staging-{{ checksum "mix.lock" }}-{{ .Revision }}
               - v1-staging-{{ checksum "mix.lock" }}-
               - v1-staging-
-        <%= if not(@include_hex_auth), do: "#" %> - <<: *hex_auth
+        <%= if not(@include_hex_auth), do: "# " %>- <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
@@ -760,7 +760,7 @@ defmodule Mix.Tasks.Boilex.Init do
               - v1-prod-{{ checksum "mix.lock" }}-{{ .Revision }}
               - v1-prod-{{ checksum "mix.lock" }}-
               - v1-prod-
-        <%= if not(@include_hex_auth), do: "#" %> - <<: *hex_auth
+        <%= if not(@include_hex_auth), do: "# " %>- <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
@@ -812,7 +812,7 @@ defmodule Mix.Tasks.Boilex.Init do
               - v1-doc-{{ checksum "mix.lock" }}-{{ .Revision }}
               - v1-doc-{{ checksum "mix.lock" }}-
               - v1-doc-
-        <%= if not(@include_hex_auth), do: "#" %> - <<: *hex_auth
+        <%= if not(@include_hex_auth), do: "# " %>- <<: *hex_auth
         - <<: *fetch_dependencies
         - <<: *compile_dependencies
         - <<: *compile_protocols
@@ -1020,7 +1020,7 @@ defmodule Mix.Tasks.Boilex.Init do
         ]
       ],
       # ex_doc
-      name:         "#{ assigns |> Keyword.get(:otp_application) |> Macro.camelize }",
+      name:         "#{ assigns |> Keyword.get(:otp_application) |> Atom.to_string |> Macro.camelize }",
       source_url:   "TODO_PUT_HERE_GITHUB_URL",
       homepage_url: "TODO_PUT_HERE_GITHUB_URL",
       docs:         [main: "readme", extras: ["README.md"]],
