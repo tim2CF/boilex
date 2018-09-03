@@ -367,7 +367,7 @@ defmodule Mix.Tasks.Boilex.Init do
 
   services:
     main:
-      image: "<%= @otp_application |> String.replace("_", "-") %>:master"
+      image: "<%= @otp_application %>:master"
       ports:
         # - "4369:4369"         # EPMD
         - "9100-9105:9100-9105" # Distributed Erlang
