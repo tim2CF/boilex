@@ -19,8 +19,8 @@ defmodule Mix.Tasks.Boilex.Init do
 
     otp_application  = fetch_otp_application_name()
     include_postgres = Mix.shell.yes?("Include postgres stuff to CircleCI config?")
+    include_coveralls_push = Mix.shell.yes?("Push test coverage results to https://coveralls.io/ web service?")
     include_hex_auth = Mix.shell.yes?("Are you using private hex.pm?")
-    include_coveralls_push = Mix.shell.yes?("Push test results to https://coveralls.io/ web service?")
     hex_organization = fetch_hex_organization_name(include_hex_auth)
     erlang_cookie    = :crypto.strong_rand_bytes(32) |> Base.encode64
     assigns          = [
@@ -616,7 +616,7 @@ defmodule Mix.Tasks.Boilex.Init do
         - checkout
         - run:
             name:       Check variables
-            command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" <%= if @include_coveralls_push, do: "\"COVERALLS_REPO_TOKEN\"" %>
+            command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" <%= if @include_coveralls_push, do: "\\"COVERALLS_REPO_TOKEN\\"" %>
         - <<: *setup_ssh_key
         - <<: *setup_ssh_config
         - <<: *fetch_submodules
