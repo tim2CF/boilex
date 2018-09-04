@@ -51,7 +51,7 @@ defmodule Mix.Tasks.Boilex.Hex.Publish do
         |> raise
     end
 
-    System.cmd("mix", ["hex.publish", "--no-confirm"])
+    System.cmd("mix", ["hex.publish", "--yes"])
     |> case do
       {debug_log, 0} ->
         Mix.shell.info(debug_log)
