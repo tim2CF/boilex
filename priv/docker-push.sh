@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
+set -x
 
 script_file="$0"
 scripts_dir="$(dirname -- "$script_file")"
