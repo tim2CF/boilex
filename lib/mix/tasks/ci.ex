@@ -1,10 +1,5 @@
 [
   %{
-    module: Mix.Tasks.Boilex.Ci.Confluence.Push,
-    description: "Pushes generated ./doc files to confluence",
-    script: "confluence-push.sh",
-  },
-  %{
     module: Mix.Tasks.Boilex.Ci.Docker.Build,
     description: "Builds application docker image",
     script: "docker-build.sh",

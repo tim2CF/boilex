@@ -403,8 +403,6 @@ defmodule Mix.Tasks.Boilex.Init do
   ERLANG_OTP_APPLICATION="<%= @otp_application %>"
   ERLANG_COOKIE="<%= @erlang_cookie %>"
   ENABLE_DIALYZER=false
-  CONFLUENCE_SUBDOMAIN=
-  CONFLUENCE_PAGE_ID=
   """
 
   embed_text :pre_commit, """
@@ -805,7 +803,7 @@ defmodule Mix.Tasks.Boilex.Init do
         - checkout
         - run:
             name:       Check variables
-            command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY" "CONFLUENCE_SECRET"
+            command:    ./scripts/check-vars.sh "in system" "ROBOT_SSH_KEY"
         - <<: *setup_ssh_key
         - <<: *setup_ssh_config
         - <<: *fetch_submodules
@@ -827,9 +825,6 @@ defmodule Mix.Tasks.Boilex.Init do
         - run:
             name:       Compile documentation
             command:    mix docs<%= if @include_postgres, do: "\n"<>postgres_circleci_erd() %>
-        - run:
-            name:       Push documentation to confluence
-            command:    export $(cat "./scripts/.env" | xargs) && mix boilex.ci.confluence.push "$CIRCLE_TAG"
 
   workflows:
     version: 2

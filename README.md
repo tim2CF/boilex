@@ -9,7 +9,7 @@ Boilex is mix-based Elixir development tool. It
 - generates Circleci configurations for
   - testing
   - building docker images + pushing to Dockerhub
-  - building project documentation + ERD + pushing to Confluence
+  - building project documentation + ERD
 - generates Docker configurations
 - generates development scripts (for remote debugging etc)
 - provides releases versioning
@@ -85,9 +85,6 @@ Some system variables are required by some scripts, description of all variables
 - `ERLANG_OTP_APPLICATION` lowercase and snakecase standard OTP application name, example: **elixir_app**
 - `ERLANG_COOKIE` remote Erlang node cookie, example: **OEBy/p9vFWi85XTeYOUvIwLr/sZctkHPKWNxfTtf81M=**
 - `ENABLE_DIALYZER` run Dialyzer checks in pre-commit hooks or not, example: **false**
-- `CONFLUENCE_SUBDOMAIN` first part of confluence domain name, example: **mycompany**.atlassian.net/wiki/spaces/PROJECT/pages/323322444/elixir-app
-- `CONFLUENCE_PAGE_ID` numeric id of project page, example: mycompany.atlassian.net/wiki/spaces/PROJECT/pages/**323322444**/elixir-app
-- `CONFLUENCE_SECRET` access token generated from atlassian login and password in the following way *`"#{login}:#{password}" |> Base.encode64`*, example: **bG9naW46cGFzc3dvcmQ=**. CONFLUENCE_SECRET can be generated only from normal login/password pair. To get atlassian account with normal login/password, user should not use g-suite to sign in into Confluence. The simplest way is to not use google email address as login (use any other email address).
 - `CHANGELOG_GITHUB_TOKEN` is token for *github_changelog_generator* utility. Token is **required** for private repos. Reference is [HERE](https://github.com/skywinder/github-changelog-generator#github-token).
 
 Variables can be defined in `scripts/.env` file locally (useful for development) or globally in the system.
