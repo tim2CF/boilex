@@ -1,6 +1,7 @@
 defmodule Boilex.Utils do
 
   require Logger
+  import Mix.Generator
 
   def create_symlink(destination_path, symlink_path) do
     destination_path
@@ -38,6 +39,22 @@ defmodule Boilex.Utils do
         """
         |> raise
     end
+  end
+
+  def create_script(name, value) do
+    create_file       name, value
+    :ok = File.chmod  name, 0o755
+  end
+
+  def fetch_elixir_version do
+    [{:elixir, _, version}] =
+      :application.which_applications
+      |> Enum.filter(fn({app, _, _}) ->
+        app == :elixir
+      end)
+
+    version
+    |> :erlang.list_to_binary
   end
 
 end
