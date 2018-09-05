@@ -96,6 +96,8 @@ defmodule Mix.Tasks.Boilex.Init do
   !!! IMPORTANT !!!
   *****************
 
+  ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+
   #{IO.ANSI.cyan}
   REPLACE `version` LINE OF `project` FUNCTION IN `mix.exs` FILE WITH
   #{IO.ANSI.green}
@@ -189,6 +191,9 @@ defmodule Mix.Tasks.Boilex.Init do
   Please configure `scripts/.env` file if you want to use distributed erlang features in development process.
 
   #{IO.ANSI.magenta}
+
+  ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+
   *****************
   !!! IMPORTANT !!!
   *****************
