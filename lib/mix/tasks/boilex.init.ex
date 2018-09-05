@@ -983,16 +983,6 @@ defmodule Mix.Tasks.Boilex.Init do
 
 
     #{IO.ANSI.cyan}
-    ADD THE FOLLOWING LINES TO `.gitignore` FILE
-    #{IO.ANSI.green}
-
-
-      /doc
-      /cover
-      /.elixir_ls
-
-
-    #{IO.ANSI.cyan}
     ADD THE FOLLOWING PARAMETERS TO `project` FUNCTION IN `mix.exs` FILE
     #{IO.ANSI.green}
 
@@ -1035,6 +1025,19 @@ defmodule Mix.Tasks.Boilex.Init do
 
 
     #{IO.ANSI.cyan}
+    ADD THE FOLLOWING PARAMETERS TO `deps` FUNCTION IN `mix.exs` FILE
+    #{IO.ANSI.green}
+
+
+      # development tools
+      {:excoveralls, "~> 0.8", runtime: false},
+      {:dialyxir, "~> 0.5",    runtime: false},
+      {:ex_doc, "~> 0.19",     runtime: false},
+      {:credo, "~> 0.9",       runtime: false},
+      {:boilex, "~> 0.2",      runtime: false},
+
+
+    #{IO.ANSI.cyan}
     If your project is OTP application (not just library),
     probably you would like to add `stop` function to your
     `application.ex` file to prevent situations when
@@ -1048,6 +1051,16 @@ defmodule Mix.Tasks.Boilex.Init do
         |> Logger.error([reason: reason])
         :init.stop()
       end
+
+
+    #{IO.ANSI.cyan}
+    ADD THE FOLLOWING LINES TO `.gitignore` FILE
+    #{IO.ANSI.green}
+
+
+      /doc
+      /cover
+      /.elixir_ls
 
 
     #{IO.ANSI.cyan}

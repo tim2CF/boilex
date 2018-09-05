@@ -20,11 +20,11 @@ Add the following parameters to `deps` function in `mix.exs` file
 
 ```
 # development tools
-{:excoveralls, "~> 0.8", only: [:dev, :test], runtime: false},
-{:dialyxir, "~> 0.5",    only: [:dev, :test], runtime: false},
-{:ex_doc, "~> 0.19",     only: [:dev, :test], runtime: false},
-{:credo, "~> 0.9",       only: [:dev, :test], runtime: false},
-{:boilex, "~> 0.2",      only: [:dev, :test], runtime: false},
+{:excoveralls, "~> 0.8", runtime: false},
+{:dialyxir, "~> 0.5",    runtime: false},
+{:ex_doc, "~> 0.19",     runtime: false},
+{:credo, "~> 0.9",       runtime: false},
+{:boilex, "~> 0.2",      runtime: false},
 ```
 
 ## Usage
