@@ -17,20 +17,21 @@ defmodule Mix.Tasks.Boilex.Init do
   @spec run(OptionParser.argv) :: :ok
   def run(_) do
 
-    otp_application  = fetch_otp_application_name()
-    include_postgres = Mix.shell.yes?("Include postgres stuff to CircleCI config?")
-    include_coveralls_push = Mix.shell.yes?("Push test coverage results to https://coveralls.io/ web service?")
+    include_postgres = Mix.shell.yes?("Are you using Postgres database?")
     include_hex_auth = Mix.shell.yes?("Are you using private hex.pm?")
     hex_organization = fetch_hex_organization_name(include_hex_auth)
-    erlang_cookie    = :crypto.strong_rand_bytes(32) |> Base.encode64
-    assigns          = [
-                        otp_application:        otp_application,
-                        erlang_cookie:          erlang_cookie,
-                        include_postgres:       include_postgres,
-                        include_hex_auth:       include_hex_auth,
-                        hex_organization:       hex_organization,
-                        include_coveralls_push: include_coveralls_push,
-                       ]
+    include_coveralls_push = Mix.shell.yes?("Do you want to push test coverage results to https://coveralls.io/ web service?")
+
+    assigns = [
+                # from user
+                include_postgres:       include_postgres,
+                include_hex_auth:       include_hex_auth,
+                hex_organization:       hex_organization,
+                include_coveralls_push: include_coveralls_push,
+                # automated
+                otp_application:        fetch_otp_application_name(),
+                erlang_cookie:          (32 |> :crypto.strong_rand_bytes |> Base.encode64),
+              ]
 
     # priv dir for usage in Elixir code
     create_directory  "priv"
@@ -1112,7 +1113,7 @@ defmodule Mix.Tasks.Boilex.Init do
   end
 
   defp fetch_hex_organization_name(true) do
-    "Please type HEX organization name>"
+    "Please type hex.pm organization name>"
     |> Mix.shell.prompt
     |> String.trim
     |> case do
